@@ -5,6 +5,7 @@
   org.clojure/tools.namespace {:mvn/version "0.3.0-alpha4"}
   expound                     {:mvn/version "0.6.0"}
   lambdaisland/kaocha         {:local/root "/home/arne/github/kaocha"}
+  net.ladenthin/streambuffer {:mvn/version "1.1.0"}
   }
 
  :paths ["src" "resources"]
