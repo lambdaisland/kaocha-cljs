@@ -1,4 +1,4 @@
-#kaocha
+#kaocha/v1
 {:tests [{:id         :cljs-tests
           :type       :kaocha.type/cljs
           :test-paths ["test/cljs"]}]}

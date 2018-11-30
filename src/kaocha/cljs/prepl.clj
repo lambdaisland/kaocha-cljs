@@ -1,8 +1,9 @@
 (ns kaocha.cljs.prepl
   (:require [cljs.core.server :as cljs-server]
-            [clojure.tools.reader.reader-types :as ctr.types]
-            [clojure.core.async :as async])
-  (:import [java.util.concurrent LinkedBlockingQueue]))
+            [cljs.repl.node :as node]
+            [clojure.java.io :as io]
+            [clojure.tools.reader.reader-types :as ctr.types])
+  (:import [java.util.concurrent BlockingQueue LinkedBlockingQueue]))
 
 (defprotocol Writable
   (write [writer string]))
@@ -50,32 +51,45 @@
         reader (->WritableReader queue nil 0)]
     reader))
 
-(defn prepl [repl-env]
+(defn prepl [repl-env ^BlockingQueue queue]
   (let [out              *out*
         writable-reader  (writable-reader)
         push-back-reader (ctr.types/push-back-reader writable-reader)
-        res-chan         (async/chan)
         eval             (fn [s] (write writable-reader (str s "\n")))
         opts             {}
         reader           (ctr.types/source-logging-push-back-reader push-back-reader)
-        out-fn           #(binding [*out* out]
-                            (prn %)
-                            (async/put! res-chan %))]
-    (future (cljs-server/prepl repl-env opts reader out-fn))
-    [eval res-chan]))
+        out-fn           #(.offer queue (let [tag (:tag %)]
+                                          (assoc (dissoc % :tag) :type (keyword "cljs" (name tag)))))]
+    (future
+      (try
+        (cljs-server/prepl repl-env opts reader out-fn)
+        (.offer queue {:type ::exit})
+        (catch Exception e
+          (println "Exception in prepl" e))))
+    eval))
 
-(require 'cljs.repl.rhino)
+(comment
+  (let [chan (LinkedBlockingQueue.)
+        eval (prepl (node/repl-env) chan)]
+    (def eval-cljs eval)
+    (def res-chan chan))
 
-(let [[eval chan] (prepl (cljs.repl.rhino/repl-env))]
-  (def eval-cljs eval)
-  (def res-chan chan))
+  (eval-cljs "(require 'kaocha.cljs.websocket-client :reload)")
+  (eval-cljs "kaocha.cljs.websocket-client/socket")
+  (eval-cljs "(kaocha.cljs.websocket-client/connect!)")
+  (eval-cljs "(require 'ktest.first-test)")
+  (eval-cljs "(ktest.first-test/regular-fail)")
 
-#_
-(async/go-loop [% (async/<! res-chan)]
-  (prn %)
-  (when (= (:tag % :ret))
-    (prn :----> (:val %)))
-  (recur (async/<! res-chan)))
+  (eval-cljs "(xxx)")
 
-#_
-(eval-cljs "9999")
+  (io/resource "ktest/first_test.cljs")
+  (.getContextClassLoader (Thread/currentThread))
+  (io/resource "ktest/first_test.cljs"), :cljc ktest/first_test.cljc
+
+  (eval-cljs "(require 'kaocha.cljs.websocket-client) (kaocha.cljs.websocket-client/connect!) :done")
+
+  (take-while identity (repeatedly #(.poll res-chan)))
+
+  (cljs.util/ns->source 'ktest.first-test)
+
+  )

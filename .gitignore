@@ -2,3 +2,5 @@
 .nrepl-port
 target
 .cljs_rhino_repl
+.cljs_node_repl
+node_modules

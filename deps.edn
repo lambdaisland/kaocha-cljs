@@ -1,14 +1,21 @@
 {:deps
  {org.clojure/clojure         {:mvn/version "1.10.0-alpha5"}
-  org.clojure/clojurescript   {:mvn/version "1.10.339"}
-  org.clojure/spec.alpha      {:mvn/version "0.1.143"}
+  org.clojure/clojurescript   {:mvn/version "1.10.439"}
+  org.clojure/spec.alpha      {:mvn/version "0.2.176"}
   org.clojure/tools.namespace {:mvn/version "0.3.0-alpha4"}
-  expound                     {:mvn/version "0.6.0"}
-  lambdaisland/kaocha         {:local/root "/home/arne/github/kaocha"}
+
+  http-kit {:mvn/version "2.3.0"}
+  com.cognitect/transit-clj {:mvn/version "0.8.313"}
+  com.cognitect/transit-js {:mvn/version "0.8.861"}
+
+  lambdaisland/kaocha
+  #_{:mvn/version "0.0-266"}
+  {:local/root "/home/arne/github/lambdaisland/kaocha"}
+
   net.ladenthin/streambuffer {:mvn/version "1.1.0"}
   }
 
- :paths ["src" "resources"]
+ :paths ["src" "resources" "test/cljs"]
 
  :aliases
  {:test
@@ -17,8 +24,5 @@
 
   :dev
   {:extra-paths ["dev" "test/api" "test/shared"]
-   :extra-deps  {com.cemerick/pomegranate     {:mvn/version "1.0.0"}
-                 nubank/matcher-combinators   {:mvn/version "0.2.5"}
-                 org.clojure/tools.deps.alpha {:mvn/version "0.5.417"}
-                 lambdaisland/nrepl           {:mvn/version "0.2.0" :exclusions [org.clojure/tools.cli]}
+   :extra-deps  {nubank/matcher-combinators   {:mvn/version "0.4.2"}
                  }}}}
