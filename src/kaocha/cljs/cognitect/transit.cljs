@@ -1,4 +1,4 @@
-;; Vendored copy of as of yet unreleased transit-cljs
+;; Vendored copy of as of yet unreleased transit-cljs, with support for :default tag handlers
 ;; https://github.com/lambdaisland/transit-cljs/blob/37e25db4eade6b92c95f1319d93d3447de2ade22/src/cognitect/transit.cljs
 ;; Arne - 2018-11-30
 

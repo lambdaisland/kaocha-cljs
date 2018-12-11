@@ -2,7 +2,9 @@
   (:require [cljs.analyzer :as ana]
             [cljs.compiler :as comp]
             [cljs.env :as env]
-            [cljs.repl.node :as node]
+            [cljs.repl :as repl]
+            [cljs.repl.server]
+            [cljs.test :as ct]
             [clojure.java.io :as io]
             [clojure.spec.alpha :as s]
             [clojure.test :as t]
@@ -17,23 +19,27 @@
             [lambdaisland.tools.namespace.find :as ctn.find]
             [lambdaisland.tools.namespace.parse :as ctn.parse]
             [kaocha.type :as type]
-            [kaocha.result :as result])
+            [kaocha.result :as result]
+            [clojure.string :as str])
   (:import [java.util.concurrent LinkedBlockingQueue TimeUnit]))
 
-(defn ns-testable [ns-name ns-file]
+(require 'kaocha.cljs.print-handlers)
+(require 'kaocha.type.var) ;; load the hierarchy for :kaocha.type.var/zero-assertions
+
+(defn ns-testable [ns-sym ns-file]
   {::testable/type ::ns
-   ::testable/id (keyword ns-name)
-   ::testable/meta (meta ns-name)
-   ::testable/desc (str ns-name)
-   ::ns ns-name
+   ::testable/id (keyword (str "cljs:" ns-sym))
+   ::testable/meta (meta ns-sym)
+   ::testable/desc (str ns-sym)
+   ::ns ns-sym
    ::file ns-file})
 
-(defn test-testable [name meta]
+(defn test-testable [test-name meta]
   {::testable/type ::test
-   ::testable/id (keyword name)
-   ::testable/desc (str name)
+   ::testable/id (keyword (str "cljs:" test-name))
+   ::testable/desc (name test-name)
    ::testable/meta meta
-   ::test name})
+   ::test test-name})
 
 (defn find-cljs-sources-in-dirs [paths]
   (mapcat #(ctn.find/find-sources-in-dir % ctn.find/cljs) paths))
@@ -44,7 +50,7 @@
 (defmethod testable/-load :kaocha.type/cljs [testable]
   (let [options     (:cljs/compiler-options testable {})
         repl-env    (:cljs/repl-env testable 'cljs.repl.node/repl-env)
-        timeout     (:cljs/timeout testable 5000)
+        timeout     (:cljs/timeout testable 10000)
         test-paths  (map io/file (:kaocha/test-paths testable))
         ns-patterns (map regex (:kaocha/ns-patterns testable))
         test-files  (find-cljs-sources-in-dirs test-paths)
@@ -84,7 +90,8 @@
 (def default-queue-handlers
   {::ws/connect
    (fn [_ state]
-     (assoc state :ws/connected? true))
+     (assoc state
+            :ws/connected? true))
 
    ::ws/disconnect
    (fn [_ state]
@@ -94,7 +101,8 @@
 
    :cljs.test/message
    (fn [msg state]
-     (t/do-report (:cljs.test/message msg))
+     (binding [t/*testing-contexts* (:cljs.test/testing-contexts msg)]
+       (t/do-report (:cljs.test/message msg)))
      state)
 
    :cljs/out
@@ -119,9 +127,20 @@
        :always
        (assoc :cljs/last-val val)))
 
+   :cljs/ready
+   (fn [m state]
+     (throw (ex-info ":cljs/ready" m))
+     state)
+
+   :cljs/exists
+   (fn [m state]
+     (assoc state :cljs/exists (:symbol m)))
+
    :kaocha.cljs.websocket-client/connected
-   (fn [_ state]
-     (assoc state :ws-client/ack? true))
+   (fn [msg state]
+     (assoc state
+            :ws-client/ack? true
+            :repl-env/browser? (:browser? msg)))
 
    ::prepl/exit
    (fn [_ state]
@@ -139,7 +158,7 @@
           :timeout)
 
         (let [message (cond-> message (contains? message :message) :message)]
-          #_(prn (:type message) message)
+          #_(prn (:type message) '-> message)
           (if-let [handler (get handlers (:type message))]
             (let [state (handler message state)]
               #_(prn "    STATE" state)
@@ -150,13 +169,20 @@
 
 (defmethod testable/-run :kaocha.type/cljs [{:cljs/keys [compiler-options repl-env timeout] :as testable} test-plan]
   (t/do-report {:type :begin-test-suite})
+
+  ;; Somehow these don't get cleaned up properly, leading to issues when
+  ;; starting a new browser-based environment a second time in the same process.
+  ;; Drain the queues so we're at a clean slate once more.
+  (while (.poll cljs.repl.server/connq))
+  (while (.poll cljs.repl.server/promiseq))
+
   (let [queue    (LinkedBlockingQueue.)
         renv     (do (require (symbol (namespace repl-env)))
                      (mapply (resolve repl-env) compiler-options))
         stop-ws! (ws/start! queue)]
     (try
       (let [eval (prepl/prepl renv queue)]
-        (eval "(require 'kaocha.cljs.websocket-client) (kaocha.cljs.websocket-client/connect!) :done")
+        (eval "(require 'kaocha.cljs.websocket-client) :done")
 
         (queue-consumer {:queue queue
                          :timeout timeout
@@ -199,19 +225,36 @@
           (t/do-report {:type :end-test-suite})
           (assoc (dissoc testable :kaocha.test-plan/tests) :kaocha.result/tests tests)))
       (finally
-        (stop-ws!)))))
+        (try
+          (repl/tear-down renv)
+          (finally
+            (stop-ws!)))))))
 
 (defmethod testable/-run ::ns [{::keys [ns eval queue timeout] :as testable} test-plan]
   (t/do-report {:type :begin-test-ns})
-  (eval (str "(require '" ns ") :done"))
-  (queue-consumer {:queue queue
-                   :timeout timeout
-                   :handlers {:timeout
-                              (fn [state]
-                                (throw (ex-info (str "Timeout loading ClojureScript namespace " ns) testable)))}
+  (eval (str "(require '" ns ")
 
-                   :result (fn [{last-val :cljs/last-val}]
-                             (= ":done" last-val))})
+((fn wait-for-symbol []
+   (if (exists? " ns ")
+     (kaocha.cljs.websocket-client/send! {:type :cljs/exists :symbol '" ns "})
+     (js/setTimeout wait-for-symbol 50))))
+
+:done"))
+
+  (let [js-file (-> ns str (str/replace "-" "_") (str/replace "." "/") (str ".js"))]
+    (queue-consumer {:queue queue
+                     :timeout timeout
+                     :handlers {:timeout
+                                (fn [state]
+                                  (throw (ex-info (str "Timeout loading ClojureScript namespace " ns) testable)))}
+
+                     :result (fn [{last-val :cljs/last-val
+                                   exists :cljs/exists
+                                   browser? :repl-env/browser?}]
+                               (and last-val exists
+                                    (= ":done" last-val)
+                                    (= ns exists)))}))
+
   (let [tests (testable/run-testables (map #(assoc %
                                                    ::eval eval
                                                    ::timeout timeout
@@ -236,7 +279,7 @@
     (let [{::result/keys [pass error fail pending] :as result} (type/report-count)]
       (when (= pass error fail pending 0)
         (binding [testable/*fail-fast?* false]
-          (t/do-report {:type ::zero-assertions})))
+          (t/do-report {:type :kaocha.type.var/zero-assertions})))
       (merge testable {:kaocha.result/count 1} (type/report-count)))))
 
 (hierarchy/derive! ::test :kaocha.testable.type/leaf)
@@ -250,18 +293,28 @@
 (s/def ::ns any?)
 (s/def ::test any?)
 
+(defmethod ct/assert-expr '= [menv msg form]
+  (if (= 2 (count form))
+    `(ct/do-report {:type :kaocha.report/one-arg-eql
+                    :message "Equality assertion expects 2 or more values to compare, but only 1 arguments given."
+                    :expected '~(concat form '(arg2))
+                    :actual '~form})
+    (ct/assert-predicate msg form)))
 
 (comment
   (require 'kaocha.repl)
 
   (kaocha.repl/run :cljs {:kaocha/tests [{:kaocha.testable/type :kaocha.type/cljs
-                                          :kaocha.testable/desc ""
                                           :kaocha.testable/id   :cljs
                                           :kaocha/source-paths  ["src"]
                                           :kaocha/test-paths    ["test/cljs"]
                                           :kaocha/ns-patterns   [".*-test$"]
-                                          :cljs/timeout 5000}]
+                                          :cljs/timeout 50000
+                                          :cljs/repl-env 'cljs.repl.browser/repl-env
+                                          }]
                           :kaocha.plugin.capture-output/capture-output? false
-                          :kaocha/reporter [kaocha.report/documentation]})
+                          :kaocha/reporter ['kaocha.report/documentation]})
+
+  (require 'kaocha.type.var)
 
   )

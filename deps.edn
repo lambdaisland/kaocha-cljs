@@ -1,5 +1,5 @@
 {:deps
- {org.clojure/clojure         {:mvn/version "1.10.0-alpha5"}
+ {org.clojure/clojure         {:mvn/version "1.10.0-RC4"}
   org.clojure/clojurescript   {:mvn/version "1.10.439"}
   org.clojure/spec.alpha      {:mvn/version "0.2.176"}
   org.clojure/tools.namespace {:mvn/version "0.3.0-alpha4"}
@@ -8,8 +8,10 @@
   com.cognitect/transit-clj {:mvn/version "0.8.313"}
   com.cognitect/transit-js {:mvn/version "0.8.861"}
 
+  pjstadig/humane-test-output {:mvn/version "0.9.0"}
+
   lambdaisland/kaocha
-  #_{:mvn/version "0.0-266"}
+  #_{:mvn/version "0.0-313"}
   {:local/root "/home/arne/github/lambdaisland/kaocha"}
 
   net.ladenthin/streambuffer {:mvn/version "1.1.0"}

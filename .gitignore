@@ -4,3 +4,6 @@ target
 .cljs_rhino_repl
 .cljs_node_repl
 node_modules
+.cljs_nashorn_repl
+nashorn_code_cache
+out

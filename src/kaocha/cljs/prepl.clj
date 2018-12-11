@@ -1,6 +1,5 @@
 (ns kaocha.cljs.prepl
   (:require [cljs.core.server :as cljs-server]
-            [cljs.repl.node :as node]
             [clojure.java.io :as io]
             [clojure.tools.reader.reader-types :as ctr.types])
   (:import [java.util.concurrent BlockingQueue LinkedBlockingQueue]))
@@ -69,8 +68,10 @@
     eval))
 
 (comment
+  (require 'cljs.repl.node)
+
   (let [chan (LinkedBlockingQueue.)
-        eval (prepl (node/repl-env) chan)]
+        eval (prepl (cljs.repl.node/repl-env) chan)]
     (def eval-cljs eval)
     (def res-chan chan))
 

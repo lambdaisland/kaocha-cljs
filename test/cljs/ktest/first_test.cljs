@@ -22,3 +22,9 @@
 
   (testing "that bar is, in fact, bar"
     (is (= :bar :bar))))
+
+(t/deftest no-assert
+  (= 1 1))
+
+(t/deftest single-arg-=
+  (is (= 1)))
