@@ -47,7 +47,7 @@
   (transit/read (transit/reader :json) string))
 
 (defn send! [message]
-  (when socket
+  (when (and socket (= (.-readyState socket) (.-OPEN socket)))
     (.send socket (to-transit message))))
 
 (defn pretty-print-failure [m]

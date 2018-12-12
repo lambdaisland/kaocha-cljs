@@ -54,7 +54,9 @@
   (let [out              *out*
         writable-reader  (writable-reader)
         push-back-reader (ctr.types/push-back-reader writable-reader)
-        eval             (fn [s] (write writable-reader (str s "\n")))
+        eval             (fn [s]
+                           #_(println s)
+                           (write writable-reader (str s "\n")))
         opts             {}
         reader           (ctr.types/source-logging-push-back-reader push-back-reader)
         out-fn           #(.offer queue (let [tag (:tag %)]

@@ -4,27 +4,24 @@
   org.clojure/spec.alpha      {:mvn/version "0.2.176"}
   org.clojure/tools.namespace {:mvn/version "0.3.0-alpha4"}
 
-  http-kit {:mvn/version "2.3.0"}
+  http-kit                  {:mvn/version "2.3.0"}
   com.cognitect/transit-clj {:mvn/version "0.8.313"}
-  com.cognitect/transit-js {:mvn/version "0.8.861"}
+  com.cognitect/transit-js  {:mvn/version "0.8.861"}
 
   pjstadig/humane-test-output {:mvn/version "0.9.0"}
 
-  lambdaisland/kaocha
-  #_{:mvn/version "0.0-313"}
-  {:local/root "/home/arne/github/lambdaisland/kaocha"}
-
-  net.ladenthin/streambuffer {:mvn/version "1.1.0"}
-  }
+  lambdaisland/kaocha        {:mvn/version "0.0-319"}
+  net.ladenthin/streambuffer {:mvn/version "1.1.0"}}
 
  :paths ["src" "resources" "test/cljs"]
 
  :aliases
  {:test
-  {:main-opts  ["-m" "kaocha.runner"]
-   :extra-deps {}}
+  {:extra-deps {lambdaisland/kaocha-cucumber  {:mvn/version "RELEASE"}
+                lambdaisland/kaocha-cloverage {:mvn/version "RELEASE"}
+                nubank/matcher-combinators    {:mvn/version "0.4.2"}
+                akvo/fs                       {:mvn/version "20180904-152732.6dad3934"}}}
 
   :dev
-  {:extra-paths ["dev" "test/api" "test/shared"]
-   :extra-deps  {nubank/matcher-combinators   {:mvn/version "0.4.2"}
-                 }}}}
+  {:extra-paths []
+   :extra-deps  {}}}}

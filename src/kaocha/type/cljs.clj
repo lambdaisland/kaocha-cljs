@@ -3,25 +3,28 @@
             [cljs.compiler :as comp]
             [cljs.env :as env]
             [cljs.repl :as repl]
-            [cljs.repl.server]
+            cljs.repl.server
             [cljs.test :as ct]
             [clojure.java.io :as io]
             [clojure.spec.alpha :as s]
+            [clojure.string :as str]
             [clojure.test :as t]
             [kaocha.cljs.prepl :as prepl]
             [kaocha.cljs.websocket-server :as ws]
             [kaocha.core-ext :refer :all]
             [kaocha.hierarchy :as hierarchy]
             [kaocha.load :as load]
-            [kaocha.output :as output]
+            [kaocha.result :as result]
             [kaocha.testable :as testable]
+            [kaocha.type :as type]
             [lambdaisland.tools.namespace.file :as ctn.file]
             [lambdaisland.tools.namespace.find :as ctn.find]
             [lambdaisland.tools.namespace.parse :as ctn.parse]
-            [kaocha.type :as type]
-            [kaocha.result :as result]
-            [clojure.string :as str])
-  (:import [java.util.concurrent LinkedBlockingQueue TimeUnit]))
+            [slingshot.slingshot :refer [try+]]
+            [kaocha.report :as report]
+            [kaocha.output :as output])
+  (:import java.lang.Process
+           [java.util.concurrent LinkedBlockingQueue TimeUnit]))
 
 (require 'kaocha.cljs.print-handlers)
 (require 'kaocha.type.var) ;; load the hierarchy for :kaocha.type.var/zero-assertions
@@ -127,11 +130,6 @@
        :always
        (assoc :cljs/last-val val)))
 
-   :cljs/ready
-   (fn [m state]
-     (throw (ex-info ":cljs/ready" m))
-     state)
-
    :cljs/exists
    (fn [m state]
      (assoc state :cljs/exists (:symbol m)))
@@ -167,6 +165,13 @@
                 (recur (poll) state)))
             (recur (poll) state)))))))
 
+(defn- alive? [^Process proc]
+  (try (.exitValue proc) false (catch IllegalThreadStateException _ true)))
+
+(defn- kill! [^Process proc]
+  (when (alive? proc)
+    (.destroyForcibly proc)))
+
 (defmethod testable/-run :kaocha.type/cljs [{:cljs/keys [compiler-options repl-env timeout] :as testable} test-plan]
   (t/do-report {:type :begin-test-suite})
 
@@ -180,68 +185,78 @@
         renv     (do (require (symbol (namespace repl-env)))
                      (mapply (resolve repl-env) compiler-options))
         stop-ws! (ws/start! queue)]
-    (try
-      (let [eval (prepl/prepl renv queue)]
-        (eval "(require 'kaocha.cljs.websocket-client) :done")
+    (try+
+     (let [eval (prepl/prepl renv queue)
+           done (str ":" (gensym "require-websocket-client-done"))]
+       (eval (str "(require 'kaocha.cljs.websocket-client)" done))
 
-        (queue-consumer {:queue queue
-                         :timeout timeout
-                         :handlers {:cljs/ret
-                                    (fn [{:keys [val] :as event} state]
-                                      (when (map? val)
-                                        (throw (ex-info "ClojureScript Error while loading Kaocha websocket client" event)))
-                                      (cond-> state
-                                        (= ":done" val)
-                                        (assoc :eval-done? true)))
+       (queue-consumer {:queue queue
+                        :timeout timeout
+                        :handlers {:cljs/ret
+                                   (fn [{:keys [val] :as event} state]
+                                     (when (map? val)
+                                       (throw (ex-info "ClojureScript Error while loading Kaocha websocket client" event)))
+                                     (cond-> state
+                                       (= done val)
+                                       (assoc :eval-done? true)))
 
-                                    :timeout
-                                    (fn [{:keys [eval-done?]}]
-                                      (if eval-done?
-                                        (throw (ex-info "Failed initializing ClojureScript runtime" testable))
-                                        (throw (ex-info "Kaocha ClojureScript client failed connecting back." testable))))}
+                                   :timeout
+                                   (fn [{:keys [eval-done?]}]
+                                     (if eval-done?
+                                       (throw (ex-info "Failed initializing ClojureScript runtime" testable))
+                                       (throw (ex-info "Kaocha ClojureScript client failed connecting back." testable))))}
 
-                         :result (fn [state]
-                                   (and (:eval-done? state)
-                                        (:ws-client/ack? state)))})
+                        :result (fn [state]
+                                  (and (:eval-done? state)
+                                       (:ws-client/ack? state)))})
 
-        (let [tests (testable/run-testables (map #(assoc %
-                                                         ::eval eval
-                                                         ::queue queue
-                                                         ::timeout timeout)
-                                                 (:kaocha.test-plan/tests testable))
-                                            test-plan)]
+       (let [tests (testable/run-testables (map #(assoc %
+                                                        ::eval eval
+                                                        ::queue queue
+                                                        ::timeout timeout)
+                                                (:kaocha.test-plan/tests testable))
+                                           test-plan)
+             timeout? (some ::timeout? tests)]
 
-          (eval "(kaocha.cljs.websocket-client/disconnect!) :cljs/quit")
-          (queue-consumer {:queue queue
-                           :timeout timeout
-                           :handlers {:timeout
-                                      (fn [state]
-                                        (throw (ex-info "Failed cleaning up ClojureScript runtime" state)))}
+         (if-let [proc (and timeout? (:proc renv))]
+           (kill! @proc)
+           (do
+             (eval "(kaocha.cljs.websocket-client/disconnect!) :cljs/quit")
+             (queue-consumer {:queue queue
+                              :timeout timeout
+                              :handlers {:timeout
+                                         (fn [state]
+                                           (throw (ex-info "Failed cleaning up ClojureScript runtime" state)))}
 
-                           :result (fn [{ws-disconnected? :ws/disconnected?
-                                         prepl-exit? ::prepl/exit?}]
-                                     (and ws-disconnected? prepl-exit?))})
+                              :result (fn [{ws-disconnected? :ws/disconnected?
+                                            prepl-exit? ::prepl/exit?}]
+                                        (and ws-disconnected? prepl-exit?))})))
 
-          (t/do-report {:type :end-test-suite})
-          (assoc (dissoc testable :kaocha.test-plan/tests) :kaocha.result/tests tests)))
-      (finally
-        (try
-          (repl/tear-down renv)
-          (finally
-            (stop-ws!)))))))
+         (t/do-report {:type :end-test-suite})
+         (assoc (dissoc testable :kaocha.test-plan/tests) :kaocha.result/tests tests)))
+     (catch Exception e
+       (println e))
+     (finally
+       (try
+         (when-let [proc (:proc renv)]
+           (kill! @proc))
+         (repl/tear-down renv)
+         (finally
+           (stop-ws!)))))))
 
 (defmethod testable/-run ::ns [{::keys [ns eval queue timeout] :as testable} test-plan]
   (t/do-report {:type :begin-test-ns})
-  (eval (str "(require '" ns ")
+  (let [js-file (-> ns str (str/replace "-" "_") (str/replace "." "/") (str ".js"))
+        done (str ":" (gensym "require-ns-done"))]
+    (eval (str "(require '" ns ")
 
 ((fn wait-for-symbol []
    (if (exists? " ns ")
      (kaocha.cljs.websocket-client/send! {:type :cljs/exists :symbol '" ns "})
      (js/setTimeout wait-for-symbol 50))))
 
-:done"))
+" done))
 
-  (let [js-file (-> ns str (str/replace "-" "_") (str/replace "." "/") (str ".js"))]
     (queue-consumer {:queue queue
                      :timeout timeout
                      :handlers {:timeout
@@ -252,37 +267,51 @@
                                    exists :cljs/exists
                                    browser? :repl-env/browser?}]
                                (and last-val exists
-                                    (= ":done" last-val)
+                                    (= done last-val)
                                     (= ns exists)))}))
 
-  (let [tests (testable/run-testables (map #(assoc %
-                                                   ::eval eval
-                                                   ::timeout timeout
-                                                   ::queue queue)
-                                           (:kaocha.test-plan/tests testable))
-                                      test-plan)]
+  (let [tests (map #(assoc %
+                           ::eval eval
+                           ::timeout timeout
+                           ::queue queue)
+                   (:kaocha.test-plan/tests testable))
+        result (testable/run-testables tests test-plan)
+        timeout? (some ::timeout? result)]
     (t/do-report {:type :end-test-ns})
-    (assoc (dissoc testable :kaocha.test-plan/tests) :kaocha.result/tests tests)))
+    (merge (dissoc testable :kaocha.test-plan/tests)
+           {:kaocha.result/tests result}
+           (when timeout?
+             {::testable/skip-remaining? true
+              ::timeout? true}))))
 
 (defmethod testable/-run ::test [{::keys [test eval queue timeout] :as testable} test-plan]
   (type/with-report-counters
-    (eval (str "(" test ") :done"))
-    (queue-consumer {:queue queue
+    (let [done (str ":" (gensym (str test "-done")))]
+      (eval (str "(" test ") " done))
+      (let [result (queue-consumer
+                    {:queue queue
                      :timeout timeout
                      :handlers {:timeout
                                 (fn [state]
-                                  (throw (ex-info (str "Timeout running ClojureScript test " test) testable)))}
+                                  (t/do-report {:type ::timeout
+                                                :message "Test timed out, skipping other tests. Consider increasing :cljs/timeout."})
+                                  :timeout)}
 
                      :result (fn [{last-val :cljs/last-val}]
-                               (= ":done" last-val))})
-
-    (let [{::result/keys [pass error fail pending] :as result} (type/report-count)]
-      (when (= pass error fail pending 0)
-        (binding [testable/*fail-fast?* false]
-          (t/do-report {:type :kaocha.type.var/zero-assertions})))
-      (merge testable {:kaocha.result/count 1} (type/report-count)))))
+                               (= done last-val))})]
+        (let [{::result/keys [pass error fail pending]} (type/report-count)]
+          (when (= pass error fail pending 0)
+            (binding [testable/*fail-fast?* false]
+              (t/do-report {:type :kaocha.type.var/zero-assertions})))
+          (merge testable
+                 {:kaocha.result/count 1}
+                 (type/report-count)
+                 (when (= :timeout result)
+                   {::timeout? true
+                    ::testable/skip-remaining? true})))))))
 
 (hierarchy/derive! ::test :kaocha.testable.type/leaf)
+(hierarchy/derive! ::timeout :kaocha/fail-type)
 
 (s/def :kaocha.type/cljs any? #_(s/keys :req [:kaocha/source-paths
                                               :kaocha/test-paths
@@ -300,6 +329,11 @@
                     :expected '~(concat form '(arg2))
                     :actual '~form})
     (ct/assert-predicate msg form)))
+
+(defmethod report/dots* ::timeout [m]
+  (t/with-test-out
+    (print (output/colored :red "T"))
+    (flush)) )
 
 (comment
   (require 'kaocha.repl)

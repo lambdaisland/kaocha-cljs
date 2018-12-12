@@ -7,3 +7,4 @@ node_modules
 .cljs_nashorn_repl
 nashorn_code_cache
 out
+bin
