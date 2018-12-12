@@ -6,7 +6,41 @@
 
 ClojureScript support for Kaocha.
 
-This is still in pre-alpha but under active development, please check back later.
+## Quickstart
+
+- Add kaocha-cljs as a dependency
+
+``` clojure
+;; deps.edn
+{:deps {lambdaisland/kaocha {...}
+        lambdaisland/kaocha-cljs {...}}}
+```
+
+- Configure a ClojureScript test suite
+
+``` clojure
+;; tests.edn
+#kaocha/v1
+{:tests [{:id :unit-cljs
+          :type :kaocha.type/cljs
+          ;; :test-paths ["test"]
+          ;; :cljs/timeout 10000                        ; 10 seconds, the default
+          ;; :cljs/repl-env cljs.repl.node/repl-env     ; node is the default
+          ;; :cljs/repl-env cljs.repl.browser/repl-env
+          }]}
+```
+
+For nodejs, install `ws` and `isomorphic-ws`
+
+```
+npm i isomorphic-ws ws
+```
+
+Run your tests
+
+```
+clojure -m kaocha.runner unit-cljs
+```
 
 <!-- license-epl -->
 ## License
