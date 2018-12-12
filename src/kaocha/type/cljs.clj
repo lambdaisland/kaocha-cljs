@@ -172,6 +172,9 @@
   (when (alive? proc)
     (.destroyForcibly proc)))
 
+(defn file-relative [file]
+  (str/replace file (str (.getCanonicalPath (io/file ".")) "/") ""))
+
 (defmethod testable/-run :kaocha.type/cljs [{:cljs/keys [compiler-options repl-env timeout] :as testable} test-plan]
   (t/do-report {:type :begin-test-suite})
 
@@ -302,7 +305,9 @@
         (let [{::result/keys [pass error fail pending]} (type/report-count)]
           (when (= pass error fail pending 0)
             (binding [testable/*fail-fast?* false]
-              (t/do-report {:type :kaocha.type.var/zero-assertions})))
+              (t/do-report {:type :kaocha.type.var/zero-assertions
+                            :file (file-relative (:file (::testable/meta testable)))
+                            :line (:line (::testable/meta testable))})))
           (merge testable
                  {:kaocha.result/count 1}
                  (type/report-count)
@@ -327,7 +332,9 @@
     `(ct/do-report {:type :kaocha.report/one-arg-eql
                     :message "Equality assertion expects 2 or more values to compare, but only 1 arguments given."
                     :expected '~(concat form '(arg2))
-                    :actual '~form})
+                    :actual '~form
+                    :file ~(file-relative (:file (meta form)))
+                    :line ~(:line (meta form))})
     (ct/assert-predicate msg form)))
 
 (defmethod report/dots* ::timeout [m]

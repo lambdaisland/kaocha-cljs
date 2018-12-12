@@ -51,8 +51,7 @@
     reader))
 
 (defn prepl [repl-env ^BlockingQueue queue]
-  (let [out              *out*
-        writable-reader  (writable-reader)
+  (let [writable-reader  (writable-reader)
         push-back-reader (ctr.types/push-back-reader writable-reader)
         eval             (fn [s]
                            #_(println s)
@@ -82,6 +81,8 @@
   (eval-cljs "(kaocha.cljs.websocket-client/connect!)")
   (eval-cljs "(require 'ktest.first-test)")
   (eval-cljs "(ktest.first-test/regular-fail)")
+
+  (eval-cljs ":cljs/quit")
 
   (eval-cljs "(xxx)")
 

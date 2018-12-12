@@ -67,7 +67,7 @@ Feature: Basic assertions
       """
     And the output should contain:
       """
-      FAIL in cljs:my.sample-test/single-arg-= (main.java:37)
+      FAIL in cljs:my.sample-test/single-arg-= (test/my/sample_test.cljs:29)
       Equality assertion expects 2 or more values to compare, but only 1 arguments given.
       Expected:
         (= 1 arg2)
@@ -76,7 +76,7 @@ Feature: Basic assertions
       """
     And the output should contain:
       """
-      FAIL in cljs:my.sample-test/no-assert (main.java:37)
+      FAIL in cljs:my.sample-test/no-assert (test/my/sample_test.cljs:25)
       Test ran without assertions. Did you forget an (is ...)?
       """
     And the output should contain:
