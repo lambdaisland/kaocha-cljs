@@ -16,6 +16,8 @@ ClojureScript support for Kaocha.
         lambdaisland/kaocha-cljs {...}}}
 ```
 
+Note that you must be using at least Clojure 1.10.
+
 - Configure a ClojureScript test suite
 
 ``` clojure
