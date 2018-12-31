@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>lambdaisland</groupId>
   <artifactId>kaocha-cljs</artifactId>
-  <version>0.0-11</version>
+  <version>0.0-16</version>
   <name>kaocha-cljs</name>
   <description>ClojureScript support for the Kaocha test runner.</description>
   <url>https://github.com/lambdaisland/kaocha-cljs</url>
@@ -22,7 +22,7 @@
     <url>https://github.com/lambdaisland/kaocha-cljs</url>
     <connection>scm:git:git://github.com/lambdaisland/kaocha-cljs.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/lambdaisland/kaocha-cljs.git</developerConnection>
-    <tag>36511ef41fce18c4fad4d044f1dc0be64047a001</tag>
+    <tag>4084dd2be5ac157de34fe857a539b557a278db7f</tag>
   </scm>
   <dependencies>
     <dependency>
@@ -94,7 +94,7 @@
         <configuration>
           <archive>
             <manifestEntries>
-              <Git-Revision>36511ef41fce18c4fad4d044f1dc0be64047a001</Git-Revision>
+              <Git-Revision>4084dd2be5ac157de34fe857a539b557a278db7f</Git-Revision>
             </manifestEntries>
           </archive>
         </configuration>
