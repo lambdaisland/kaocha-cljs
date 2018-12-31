@@ -63,6 +63,7 @@ Feature: Basic assertions
     And the output should contain:
       """
       ERROR in cljs:my.sample-test/exception-in-is (Error:NaN)
+      Whoopsie!
       Error: Whoopsie!
       """
     And the output should contain:

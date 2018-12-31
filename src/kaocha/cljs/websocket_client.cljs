@@ -90,10 +90,15 @@
              cljs-test-msg)))
 
 (defmethod t/report [:kaocha.type/cljs :error] [m]
-  (let [stacktrace (.-stack (:actual m))]
+  (let [error      (:actual m)
+        stacktrace (.-stack (:actual m))]
     (send! (-> m
                (assoc :kaocha.report/printed-expression
-                      (str (str/trim stacktrace) "\n"))
+                      (str (str/trim stacktrace) "\n")
+                      :kaocha.report/error-type
+                      (str "js/" (.-name error))
+                      :message
+                      (or (:message m) (.-message error)))
                cljs-test-msg))))
 
 (doseq [t [:pass :summary
