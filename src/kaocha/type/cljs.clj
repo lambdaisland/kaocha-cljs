@@ -315,6 +315,8 @@
                    {::timeout? true
                     ::testable/skip-remaining? true})))))))
 
+(hierarchy/derive! :kaocha.type/cljs :kaocha.testable.type/suite)
+(hierarchy/derive! ::ns :kaocha.testable.type/group)
 (hierarchy/derive! ::test :kaocha.testable.type/leaf)
 (hierarchy/derive! ::timeout :kaocha/fail-type)
 
