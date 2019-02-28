@@ -1,6 +1,6 @@
 {:deps
  {org.clojure/clojure         {:mvn/version "1.10.0"}
-  org.clojure/clojurescript   {:mvn/version "1.10.439"}
+  org.clojure/clojurescript   {:mvn/version "1.10.520"}
   org.clojure/spec.alpha      {:mvn/version "0.2.176"}
   org.clojure/tools.namespace {:mvn/version "0.3.0-alpha4"}
 
@@ -10,16 +10,16 @@
 
   pjstadig/humane-test-output {:mvn/version "0.9.0"}
 
-  lambdaisland/kaocha        {:mvn/version "0.0-343"}
+  lambdaisland/kaocha        {:mvn/version "0.0-389"}
   net.ladenthin/streambuffer {:mvn/version "1.1.0"}}
 
  :paths ["src" "resources" "test/cljs"]
 
  :aliases
  {:test
-  {:extra-deps {lambdaisland/kaocha-cucumber  {:mvn/version "RELEASE"}
+  {:extra-deps {lambdaisland/kaocha-cucumber  {:mvn/version "0.0-46"}
                 lambdaisland/kaocha-cloverage {:mvn/version "RELEASE"}
-                nubank/matcher-combinators    {:mvn/version "0.4.2"}
+                nubank/matcher-combinators    {:mvn/version "0.6.1"}
                 akvo/fs                       {:mvn/version "20180904-152732.6dad3934"}}}
 
   :dev
