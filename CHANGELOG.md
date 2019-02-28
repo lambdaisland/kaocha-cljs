@@ -1,10 +1,9 @@
 # Unreleased
 
-## Added
-
 ## Fixed
 
-## Changed
+- Add ClojureScript implicit options during analysis, fixes issues with CLJSJS,
+  among others.
 
 # 0.0-16 (2018-12-31 / 214b14e)
 

@@ -1,4 +1,5 @@
 (ns kaocha.type.cljs
+  (:refer-clojure :exclude [symbol])
   (:require [cljs.analyzer :as ana]
             [cljs.compiler :as comp]
             [cljs.env :as env]
@@ -22,7 +23,8 @@
             [lambdaisland.tools.namespace.parse :as ctn.parse]
             [slingshot.slingshot :refer [try+]]
             [kaocha.report :as report]
-            [kaocha.output :as output])
+            [kaocha.output :as output]
+            [cljs.closure :as closure])
   (:import java.lang.Process
            [java.util.concurrent LinkedBlockingQueue TimeUnit]))
 
@@ -57,7 +59,7 @@
         test-paths  (map io/file (:kaocha/test-paths testable))
         ns-patterns (map regex (:kaocha/ns-patterns testable))
         test-files  (find-cljs-sources-in-dirs test-paths)
-        cenv        (env/default-compiler-env options)
+        cenv        (env/default-compiler-env (closure/add-implicit-options options))
         testables   (keep (fn [ns-file]
                             (let [ns-sym (file->ns-name ns-file)]
                               (when (load/ns-match? ns-patterns ns-sym)
