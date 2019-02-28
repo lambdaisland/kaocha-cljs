@@ -33,7 +33,7 @@
     <dependency>
       <groupId>lambdaisland</groupId>
       <artifactId>kaocha</artifactId>
-      <version>0.0-343</version>
+      <version>0.0-389</version>
     </dependency>
     <dependency>
       <groupId>org.clojure</groupId>
@@ -48,7 +48,7 @@
     <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>clojurescript</artifactId>
-      <version>1.10.439</version>
+      <version>1.10.520</version>
     </dependency>
     <dependency>
       <groupId>org.clojure</groupId>
