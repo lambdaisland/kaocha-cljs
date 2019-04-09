@@ -2,6 +2,9 @@
 
 ## Added
 
+- Added support for `cljs.test/async`.
+- Added initial support for `cljs.test/use-fixtures`. Currently both `:each` and `:once` fixtures are treated as `:each` fixtures, so they run before/after each test var.
+
 ## Fixed
 
 ## Changed

@@ -96,13 +96,13 @@
   {::ws/connect
    (fn [_ state]
      (assoc state
-            :ws/connected? true))
+       :ws/connected? true))
 
    ::ws/disconnect
    (fn [_ state]
      (assoc state
-            :ws/disconnected? true
-            :ws/connected? false))
+       :ws/disconnected? true
+       :ws/connected? false))
 
    :cljs.test/message
    (fn [msg state]
@@ -139,8 +139,12 @@
    :kaocha.cljs.websocket-client/connected
    (fn [msg state]
      (assoc state
-            :ws-client/ack? true
-            :repl-env/browser? (:browser? msg)))
+       :ws-client/ack? true
+       :repl-env/browser? (:browser? msg)))
+
+   :kaocha.cljs.websocket-client/test-finished
+   (fn [{:keys [test]} state]
+     (assoc state :cljs.test/last-finished-test test))
 
    ::prepl/exit
    (fn [_ state]
@@ -292,7 +296,7 @@
 (defmethod testable/-run ::test [{::keys [test eval queue timeout] :as testable} test-plan]
   (type/with-report-counters
     (let [done (str ":" (gensym (str test "-done")))]
-      (eval (str "(" test ") " done))
+      (eval (str "(kaocha.cljs.websocket-client/run-test '" test " (var " test ")) " done))
       (let [result (queue-consumer
                     {:queue queue
                      :timeout timeout
@@ -302,8 +306,10 @@
                                                 :message "Test timed out, skipping other tests. Consider increasing :cljs/timeout."})
                                   :timeout)}
 
-                     :result (fn [{last-val :cljs/last-val}]
-                               (= done last-val))})]
+                     :result (fn [{last-val :cljs/last-val
+                                   last-test :cljs.test/last-finished-test}]
+                               (and (= done last-val)
+                                    (= test last-test)))})]
         (let [{::result/keys [pass error fail pending]} (type/report-count)]
           (when (= pass error fail pending 0)
             (binding [testable/*fail-fast?* false]
