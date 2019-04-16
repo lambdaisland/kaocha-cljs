@@ -9,6 +9,11 @@
   both `:once`, and `:each` fixtures, honoring uses of `async` in the fixture
   functions.
 
+## Fixed
+
+- Improved error handling and cleanup, to prevent cases where Kaocha would fail
+  to exit after an exception.
+
 # 0.0-24 (2019-04-09 / 248e33c)
 
 ## Added

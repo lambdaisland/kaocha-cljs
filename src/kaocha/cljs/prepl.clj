@@ -17,14 +17,15 @@
   ctr.types/Reader
   (read-char [this]
     (cond
+      (= :done s)
+      nil
+
       (or (nil? s) (>= s-pos (count s)))
       (do
         (set! s (.take queue))
         (set! s-pos 0)
-        (ctr.types/read-char this))
-
-      (= :done s)
-      nil
+        (when-not (= :done s)
+          (ctr.types/read-char this)))
 
       (> (count s) s-pos)
       (let [r (nth s s-pos)]
@@ -33,14 +34,15 @@
 
   (peek-char [this]
     (cond
+      (= :done s)
+      nil
+
       (or (nil? s) (>= s-pos (count s)))
       (do
         (set! s (.take queue))
         (set! s-pos 0)
-        (ctr.types/peek-char this))
-
-      (= :done s)
-      nil
+        (when-not (= :done s)
+          (ctr.types/peek-char this)))
 
       (> (count s) s-pos)
       (nth s s-pos))))
@@ -63,8 +65,11 @@
     (future
       (try
         (cljs-server/prepl repl-env opts reader out-fn)
+        (.offer (.-queue writable-reader) :done)
         (.offer queue {:type ::exit})
         (catch Exception e
+          (.offer (.-queue writable-reader) :done)
+          (.offer queue {:type ::exit})
           (println "Exception in prepl" e))))
     eval))
 

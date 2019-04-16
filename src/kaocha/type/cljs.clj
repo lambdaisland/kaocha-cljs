@@ -69,14 +69,14 @@
                                 (ns-testable ns-sym ns-file))))
                           test-files)]
     (assoc testable
-           :cljs/compiler-options options
-           :cljs/repl-env repl-env
-           :cljs/timeout timeout
-           :kaocha.test-plan/tests
-           (env/with-compiler-env cenv
-             (comp/with-core-cljs {}
-               (fn []
-                 (testable/load-testables testables)))))))
+      :cljs/compiler-options options
+      :cljs/repl-env repl-env
+      :cljs/timeout timeout
+      :kaocha.test-plan/tests
+      (env/with-compiler-env cenv
+        (comp/with-core-cljs {}
+          (fn []
+            (testable/load-testables testables)))))))
 
 (defmethod testable/-load ::ns [testable]
   (let [ns-name (::ns testable)
@@ -189,6 +189,19 @@
 (defn file-relative [file]
   (str/replace file (str (.getCanonicalPath (io/file ".")) "/") ""))
 
+(defmacro try-all
+  "Run all forms, even if a previous form throws an error. Good for cleanup. If
+  any of the forms throws then the last exception will be re-thrown."
+  [& forms]
+  (when-first [form forms]
+    `(try
+       ~form
+       (catch Exception e#
+         (try-all ~@(next forms))
+         (throw e#))
+       (finally
+         (try-all ~@(next forms))))))
+
 (defmethod testable/-run :kaocha.type/cljs [{:cljs/keys [compiler-options repl-env timeout] :as testable} test-plan]
   (t/do-report {:type :begin-test-suite})
 
@@ -202,71 +215,78 @@
         renv     (do (require (symbol (namespace repl-env)))
                      (mapply (resolve repl-env) compiler-options))
         stop-ws! (ws/start! queue)]
-    (try+
-     (let [eval (prepl/prepl renv queue)
-           done (keyword (gensym "require-websocket-client-done"))
-           eval (if *debug*
-                  (fn [form]
-                    (println "EVAL: " form)
-                    (eval form))
-                  eval)]
-       (eval (pr-str '(require 'kaocha.cljs.websocket-client
-                               'kaocha.cljs.run)
-                     '(require-macros 'kaocha.cljs.run) done))
+    (try
+      (let [eval (prepl/prepl renv queue)
+            done (keyword (gensym "require-websocket-client-done"))
+            eval (if *debug*
+                   (fn [form]
+                     (println "EVAL: " form)
+                     (eval form))
+                   eval)]
+        (try
+          (eval (pr-str '(require 'kaocha.cljs.websocket-client)
+                        '(require-macros 'kaocha.cljs.run)
+                        done))
 
-       (queue-consumer {:queue queue
-                        :timeout timeout
-                        :handlers {:cljs/ret
-                                   (fn [{:keys [val] :as event} state]
-                                     (when (map? val)
-                                       (throw (ex-info "ClojureScript Error while loading Kaocha websocket client" event)))
-                                     (cond-> state
-                                       (= (str done) val)
-                                       (assoc :eval-done? true)))
+          (queue-consumer {:queue queue
+                           :timeout timeout
+                           :handlers {:cljs/ret
+                                      (fn [{:keys [val] :as event} state]
+                                        (when (map? val)
+                                          (throw (ex-info "ClojureScript Error while loading Kaocha websocket client" event)))
+                                        (cond-> state
+                                          (= (str done) val)
+                                          (assoc :eval-done? true)))
 
-                                   :timeout
-                                   (fn [{:keys [eval-done?]}]
-                                     (if eval-done?
-                                       (throw (ex-info "Failed initializing ClojureScript runtime" testable))
-                                       (throw (ex-info "Kaocha ClojureScript client failed connecting back." testable))))}
+                                      :timeout
+                                      (fn [{:keys [eval-done?]}]
+                                        (if eval-done?
+                                          (throw (ex-info "Failed initializing ClojureScript runtime" testable))
+                                          (throw (ex-info "Kaocha ClojureScript client failed connecting back." testable))))}
 
-                        :result (fn [state]
-                                  (and (:eval-done? state)
-                                       (:ws-client/ack? state)))})
+                           :result (fn [state]
+                                     (and (:eval-done? state)
+                                          (:ws-client/ack? state)))})
 
-       (let [tests (testable/run-testables (map #(assoc %
-                                                   ::eval eval
-                                                   ::queue queue
-                                                   ::timeout timeout)
-                                                (:kaocha.test-plan/tests testable))
-                                           test-plan)
-             timeout? (some ::timeout? tests)]
+          (let [tests (testable/run-testables (map #(assoc %
+                                                      ::eval eval
+                                                      ::queue queue
+                                                      ::timeout timeout)
+                                                   (:kaocha.test-plan/tests testable))
+                                              test-plan)
+                timeout? (some ::timeout? tests)]
 
-         (if-let [proc (and timeout? (:proc renv))]
-           (kill! @proc)
-           (do
-             (eval "(kaocha.cljs.websocket-client/disconnect!) :cljs/quit")
-             (queue-consumer {:queue queue
-                              :timeout timeout
-                              :handlers {:timeout
-                                         (fn [state]
-                                           (throw (ex-info "Failed cleaning up ClojureScript runtime" state)))}
+            (if-let [proc (and timeout? (:proc renv))]
+              (kill! @proc)
+              (do
+                (eval "(kaocha.cljs.websocket-client/disconnect!) :cljs/quit")
+                (queue-consumer {:queue queue
+                                 :timeout timeout
+                                 :handlers {:timeout
+                                            (fn [state]
+                                              (throw (ex-info "Failed cleaning up ClojureScript runtime" state)))}
 
-                              :result (fn [{ws-disconnected? :ws/disconnected?
-                                            prepl-exit? ::prepl/exit?}]
-                                        (and ws-disconnected? prepl-exit?))})))
+                                 :result (fn [{ws-disconnected? :ws/disconnected?
+                                               prepl-exit? ::prepl/exit?}]
+                                           (and ws-disconnected? prepl-exit?))})))
 
-         (t/do-report {:type :end-test-suite})
-         (assoc (dissoc testable :kaocha.test-plan/tests) :kaocha.result/tests tests)))
-     (catch Exception e
-       (println e))
-     (finally
-       (try
-         (when-let [proc (:proc renv)]
-           (kill! @proc))
+            (t/do-report {:type :end-test-suite})
+            (assoc (dissoc testable :kaocha.test-plan/tests) :kaocha.result/tests tests))
+          (finally
+            (eval ":cljs/quit\n"))))
+      (catch Exception e
+        (t/do-report {:type                    :error
+                      :message                 "Unexpected error executing kaocha-cljs test suite."
+                      :expected                nil
+                      :actual                  e
+                      :kaocha.result/exception e})
+        (t/do-report {:type :end-test-suite})
+        (assoc testable :kaocha.result/error 1))
+      (finally
+        (try-all
+         (when-let [proc (:proc renv)] (kill! @proc))
          (repl/tear-down renv)
-         (finally
-           (stop-ws!)))))))
+         (stop-ws!))))))
 
 (defn run-once-fixtures [{::keys [queue timeout eval]} ns before-or-after]
   (eval (pr-str
