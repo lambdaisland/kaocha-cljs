@@ -10,7 +10,7 @@
 
   pjstadig/humane-test-output {:mvn/version "0.9.0"}
 
-  lambdaisland/kaocha        {:mvn/version "0.0-389"}
+  lambdaisland/kaocha        {:mvn/version "0.0-418"}
   net.ladenthin/streambuffer {:mvn/version "1.1.0"}}
 
  :paths ["src" "resources" "test/cljs"]
@@ -19,7 +19,7 @@
  {:test
   {:extra-deps {lambdaisland/kaocha-cucumber  {:mvn/version "0.0-46"}
                 lambdaisland/kaocha-cloverage {:mvn/version "RELEASE"}
-                nubank/matcher-combinators    {:mvn/version "0.6.1"}
+                nubank/matcher-combinators    {:mvn/version "0.9.0"}
                 akvo/fs                       {:mvn/version "20180904-152732.6dad3934"}}}
 
   :dev

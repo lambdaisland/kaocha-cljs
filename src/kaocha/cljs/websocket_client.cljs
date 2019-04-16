@@ -137,8 +137,4 @@
     (set! (.-onclose socket) (fn [_]))
     (.close socket)))
 
-(defn run-test [test-sym test-var]
-  (t/run-block (concat (t/test-vars-block [test-var])
-                       [#(send! {:type ::test-finished :test test-sym})])))
-
 (kaocha.cljs.websocket-client/connect!)

@@ -2,9 +2,12 @@
 
 ## Added
 
-## Fixed
-
-## Changed
+- The `kaocha.type.cljs/*debug*` var can be set to see what kaocha-cljs is doing
+  (use `:binding {kaocha.type.cljs/*debug* true}` in `tests.edn`)
+- Proper support `cljs.test/use-fixtures`. It still only supports the map
+  version, i.e. `(use-fixtures :once {:before ... :after ...})`, but should run
+  both `:once`, and `:each` fixtures, honoring uses of `async` in the fixture
+  functions.
 
 # 0.0-24 (2019-04-09 / 248e33c)
 

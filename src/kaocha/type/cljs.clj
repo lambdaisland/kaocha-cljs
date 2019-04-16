@@ -28,6 +28,9 @@
   (:import java.lang.Process
            [java.util.concurrent LinkedBlockingQueue TimeUnit]))
 
+;; Set in tests.edn with {:bindings {kaocha.type.cljs/*debug* true}}
+(def ^:dynamic *debug* false)
+
 (require 'kaocha.cljs.print-handlers)
 (require 'kaocha.type.var) ;; load the hierarchy for :kaocha.type.var/zero-assertions
 
@@ -136,13 +139,17 @@
    (fn [m state]
      (assoc state :cljs/exists (:symbol m)))
 
+   ::fixture-loaded
+   (fn [{[var-or-ns before-or-after] :fixture} state]
+     (update-in state [:loaded-fixtures var-or-ns] (fnil conj #{}) before-or-after))
+
    :kaocha.cljs.websocket-client/connected
    (fn [msg state]
      (assoc state
        :ws-client/ack? true
        :repl-env/browser? (:browser? msg)))
 
-   :kaocha.cljs.websocket-client/test-finished
+   :kaocha.cljs.run/test-finished
    (fn [{:keys [test]} state]
      (assoc state :cljs.test/last-finished-test test))
 
@@ -162,7 +169,8 @@
           :timeout)
 
         (let [message (cond-> message (contains? message :message) :message)]
-          #_(prn (:type message) '-> message)
+          (when *debug*
+            (prn (:type message) '-> message))
           (if-let [handler (get handlers (:type message))]
             (let [state (handler message state)]
               #_(prn "    STATE" state)
@@ -196,8 +204,15 @@
         stop-ws! (ws/start! queue)]
     (try+
      (let [eval (prepl/prepl renv queue)
-           done (str ":" (gensym "require-websocket-client-done"))]
-       (eval (str "(require 'kaocha.cljs.websocket-client)" done))
+           done (keyword (gensym "require-websocket-client-done"))
+           eval (if *debug*
+                  (fn [form]
+                    (println "EVAL: " form)
+                    (eval form))
+                  eval)]
+       (eval (pr-str '(require 'kaocha.cljs.websocket-client
+                               'kaocha.cljs.run)
+                     '(require-macros 'kaocha.cljs.run) done))
 
        (queue-consumer {:queue queue
                         :timeout timeout
@@ -206,7 +221,7 @@
                                      (when (map? val)
                                        (throw (ex-info "ClojureScript Error while loading Kaocha websocket client" event)))
                                      (cond-> state
-                                       (= done val)
+                                       (= (str done) val)
                                        (assoc :eval-done? true)))
 
                                    :timeout
@@ -220,9 +235,9 @@
                                        (:ws-client/ack? state)))})
 
        (let [tests (testable/run-testables (map #(assoc %
-                                                        ::eval eval
-                                                        ::queue queue
-                                                        ::timeout timeout)
+                                                   ::eval eval
+                                                   ::queue queue
+                                                   ::timeout timeout)
                                                 (:kaocha.test-plan/tests testable))
                                            test-plan)
              timeout? (some ::timeout? tests)]
@@ -253,18 +268,34 @@
          (finally
            (stop-ws!)))))))
 
+(defn run-once-fixtures [{::keys [queue timeout eval]} ns before-or-after]
+  (eval (pr-str
+         `(kaocha.cljs.run/run-once-fixtures
+           ~ns ~before-or-after
+           (~'fn []
+            (kaocha.cljs.websocket-client/send!
+             {:type ::fixture-loaded
+              :fixture ['~ns ~before-or-after]})))))
+
+  (queue-consumer {:queue queue
+                   :timeout timeout
+                   :handlers {:timeout
+                              (fn [state]
+                                (throw (ex-info (str "Timeout running :before :once fixtures on ns " ns) {})))}
+                   :result (fn [state]
+                             (get-in state [:loaded-fixtures ns before-or-after]))}))
+
+
 (defmethod testable/-run ::ns [{::keys [ns eval queue timeout] :as testable} test-plan]
   (t/do-report {:type :begin-test-ns})
   (let [js-file (-> ns str (str/replace "-" "_") (str/replace "." "/") (str ".js"))
-        done (str ":" (gensym "require-ns-done"))]
-    (eval (str "(require '" ns ")
-
-((fn wait-for-symbol []
-   (if (exists? " ns ")
-     (kaocha.cljs.websocket-client/send! {:type :cljs/exists :symbol '" ns "})
-     (js/setTimeout wait-for-symbol 50))))
-
-" done))
+        done (keyword (gensym "require-ns-done"))]
+    (eval (pr-str `(~'require '~ns)
+                  `((~'fn ~'wait-for-symbol []
+                     (if (~'exists? ~ns)
+                       (kaocha.cljs.websocket-client/send! {:type :cljs/exists :symbol '~ns})
+                       (js/setTimeout ~'wait-for-symbol 50))))
+                  done))
 
     (queue-consumer {:queue queue
                      :timeout timeout
@@ -276,16 +307,23 @@
                                    exists :cljs/exists
                                    browser? :repl-env/browser?}]
                                (and last-val exists
-                                    (= done last-val)
+                                    (= (str done) last-val)
                                     (= ns exists)))}))
 
+
+  (run-once-fixtures testable ns :before)
+
   (let [tests (map #(assoc %
-                           ::eval eval
-                           ::timeout timeout
-                           ::queue queue)
+                      ::eval eval
+                      ::timeout timeout
+                      ::queue queue)
                    (:kaocha.test-plan/tests testable))
         result (testable/run-testables tests test-plan)
         timeout? (some ::timeout? result)]
+
+    (when-not timeout?
+      (run-once-fixtures testable ns :after))
+
     (t/do-report {:type :end-test-ns})
     (merge (dissoc testable :kaocha.test-plan/tests)
            {:kaocha.result/tests result}
@@ -296,7 +334,7 @@
 (defmethod testable/-run ::test [{::keys [test eval queue timeout] :as testable} test-plan]
   (type/with-report-counters
     (let [done (str ":" (gensym (str test "-done")))]
-      (eval (str "(kaocha.cljs.websocket-client/run-test '" test " (var " test ")) " done))
+      (eval (str "(kaocha.cljs.run/run-test " test ") " done))
       (let [result (queue-consumer
                     {:queue queue
                      :timeout timeout
