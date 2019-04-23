@@ -1,10 +1,10 @@
 # Unreleased
 
-## Added
-
 ## Fixed
 
-## Changed
+- Honor `:kaocha.testable/wrap`, and thus `:kaocha.hooks/wrap-run`, which fixes
+  support for output capturing. This work is funded by
+  [Nextjournal](https://nextjournal.com/).
 
 # 0.0-29 (2019-04-16 / 56f47ff)
 
@@ -15,7 +15,7 @@
 - Proper support `cljs.test/use-fixtures`. It still only supports the map
   version, i.e. `(use-fixtures :once {:before ... :after ...})`, but should run
   both `:once`, and `:each` fixtures, honoring uses of `async` in the fixture
-  functions.
+  functions. This work is funded by [Nextjournal](https://nextjournal.com/).
 
 ## Fixed
 

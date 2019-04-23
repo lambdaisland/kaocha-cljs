@@ -334,9 +334,9 @@
   (run-once-fixtures testable ns :before)
 
   (let [tests (map #(assoc %
-                      ::eval eval
-                      ::timeout timeout
-                      ::queue queue)
+                           ::eval eval
+                           ::timeout timeout
+                           ::queue queue)
                    (:kaocha.test-plan/tests testable))
         result (testable/run-testables tests test-plan)
         timeout? (some ::timeout? result)]
@@ -351,35 +351,42 @@
              {::testable/skip-remaining? true
               ::timeout? true}))))
 
-(defmethod testable/-run ::test [{::keys [test eval queue timeout] :as testable} test-plan]
-  (type/with-report-counters
-    (let [done (str ":" (gensym (str test "-done")))]
-      (eval (str "(kaocha.cljs.run/run-test " test ") " done))
-      (let [result (queue-consumer
-                    {:queue queue
-                     :timeout timeout
-                     :handlers {:timeout
-                                (fn [state]
-                                  (t/do-report {:type ::timeout
-                                                :message "Test timed out, skipping other tests. Consider increasing :cljs/timeout."})
-                                  :timeout)}
+(defn run-test [{::keys [test eval queue timeout]}]
+  (let [done (str ":" (gensym (str test "-done")))]
+    (eval (str "(kaocha.cljs.run/run-test " test ") " done))
+    (queue-consumer
+     {:queue queue
+      :timeout timeout
+      :handlers {:timeout
+                 (fn [state]
+                   (t/do-report {:type ::timeout
+                                 :message "Test timed out, skipping other tests. Consider increasing :cljs/timeout."})
+                   :timeout)}
 
-                     :result (fn [{last-val :cljs/last-val
-                                   last-test :cljs.test/last-finished-test}]
-                               (and (= done last-val)
-                                    (= test last-test)))})]
-        (let [{::result/keys [pass error fail pending]} (type/report-count)]
-          (when (= pass error fail pending 0)
-            (binding [testable/*fail-fast?* false]
-              (t/do-report {:type :kaocha.type.var/zero-assertions
-                            :file (file-relative (:file (::testable/meta testable)))
-                            :line (:line (::testable/meta testable))})))
-          (merge testable
-                 {:kaocha.result/count 1}
-                 (type/report-count)
-                 (when (= :timeout result)
-                   {::timeout? true
-                    ::testable/skip-remaining? true})))))))
+      :result (fn [{last-val :cljs/last-val
+                    last-test :cljs.test/last-finished-test}]
+                (and (= done last-val)
+                     (= test last-test)))})))
+
+(defmethod testable/-run ::test [{::keys          [test eval queue timeout]
+                                  ::testable/keys [wrap]
+                                  :as             testable}
+                                 test-plan]
+  (type/with-report-counters
+    (let [run    (reduce #(%2 %1) #(run-test testable) wrap)
+          result (run)]
+      (let [{::result/keys [pass error fail pending]} (type/report-count)]
+        (when (= pass error fail pending 0)
+          (binding [testable/*fail-fast?* false]
+            (t/do-report {:type :kaocha.type.var/zero-assertions
+                          :file (file-relative (:file (::testable/meta testable)))
+                          :line (:line (::testable/meta testable))})))
+        (merge testable
+               {:kaocha.result/count 1}
+               (type/report-count)
+               (when (= :timeout result)
+                 {::timeout?                 true
+                  ::testable/skip-remaining? true}))))))
 
 (hierarchy/derive! :kaocha.type/cljs :kaocha.testable.type/suite)
 (hierarchy/derive! ::ns :kaocha.testable.type/group)
