@@ -44,6 +44,58 @@ Run your tests
 clojure -m kaocha.runner unit-cljs
 ```
 
+## Architecture
+
+### Kaocha's execution model
+
+Most ClojureScript testing tools work by building a big blob of JavaScript which
+contains both the compiled tests and a test runner, and then handing that over
+to a JavaScript runtime.
+
+Kaocha however enforces a specific execution model on all its test types.
+
+```
+[config] --(load)--> [test-plan] --(run)--> [result]
+```
+
+Starting from a test configuration (e.g. `tests.edn`) Kaocha will recursively
+`load` the tests, building up a hierarchical test plan. For instance
+`clojure.test` will have a test suite containing test namespaces containing test
+vars.
+
+Based on the test plan Kaocha recursively invokes run on these "testables",
+producing a final result.
+
+During these process various "hooks" are invoked (pre-test, post-test, pre-load,
+post-load), which can be implemented by plugins, and test events
+(begin-test-var, pass, fail, summary) are generated, which are handled by a
+reporter to provide realtime progress.
+
+Kaocha's built-in features, plugins and reporters are rely on this model of
+execution, so any test type must adhere to it. Note that all of this is on the
+Clojure side. Kaocha's own core, as well as plugins and reporters are all
+implemented in (JVM-based) Clojure, not in ClojureScript, so even in the case of
+ClojureScript tests the main coordination still happens from Clojure.
+
+### PREPL + Websocket
+
+To make this work kaocha-cljs makes use of a ClojureScript PREPL (a programmable
+REPL). Given a certain repl environment function (e.g. `browser/repl-env` or
+`node/repl-env`) Kaocha will boot up a ClojureScript environment ready to
+evaluate code, and load a websocket client that connects back to Kaocha-cljs, so
+we have a channel to send data back from ClojureScript to Kaocha. It will then
+send code to the PREPL to load the test namespaces, and to invoke the tests.
+
+Anything written on stderr or stdout will be forwarded to Clojure's out/err
+streams, and possibly captured by the output capturing plugin.
+
+The test events produced by `cljs.test` (pass, fail, error) are sent back over
+the websocket, and ultimately handled by whichever Kaocha reporter you are using.
+
+Events received from the PREPL and the websocket are all placed on a queue,
+which ultimately drives a state machine, which coordinates what needs to happen
+next, and gathers up the test results.
+
 <!-- license-epl -->
 ## License
 
