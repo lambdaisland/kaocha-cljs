@@ -96,6 +96,20 @@ Events received from the PREPL and the websocket are all placed on a queue,
 which ultimately drives a state machine, which coordinates what needs to happen
 next, and gathers up the test results.
 
+## Debugging
+
+If you're having issues, first try running with `--no-capture-output`. There may
+be relevant information that's being hidden.
+
+To see all messages coming in over the PREPL and Websocket you can set
+`kaocha.type.cljs/*debug*` to `true`. You can do this directly from `tests.edn`.
+
+``` clojure
+#kaocha/v1
+{:tests [,,,]
+ :bindings {kaocha.type.cljs/*debug* true}}
+```
+
 <!-- license-epl -->
 ## License
 
