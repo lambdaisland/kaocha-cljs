@@ -224,9 +224,9 @@
                      (eval form))
                    eval)]
         (try
-          (eval (pr-str '(require 'kaocha.cljs.websocket-client)
-                        '(require-macros 'kaocha.cljs.run)
-                        done))
+          (eval '(require 'kaocha.cljs.websocket-client))
+          (eval '(require-macros 'kaocha.cljs.run))
+          (eval done)
 
           (queue-consumer {:queue queue
                            :timeout timeout
@@ -259,7 +259,7 @@
             (if-let [proc (and timeout? (:proc renv))]
               (kill! @proc)
               (do
-                (eval "(kaocha.cljs.websocket-client/disconnect!) :cljs/quit")
+                (eval '(do (kaocha.cljs.websocket-client/disconnect!) :cljs/quit))
                 (queue-consumer {:queue queue
                                  :timeout timeout
                                  :handlers {:timeout
@@ -273,7 +273,7 @@
             (t/do-report {:type :end-test-suite})
             (assoc (dissoc testable :kaocha.test-plan/tests) :kaocha.result/tests tests))
           (finally
-            (eval ":cljs/quit\n"))))
+            (eval :cljs/quit))))
       (catch Exception e
         (t/do-report {:type                    :error
                       :message                 "Unexpected error executing kaocha-cljs test suite."
@@ -289,13 +289,12 @@
          (stop-ws!))))))
 
 (defn run-once-fixtures [{::keys [queue timeout eval]} ns before-or-after]
-  (eval (pr-str
-         `(kaocha.cljs.run/run-once-fixtures
-           ~ns ~before-or-after
-           (~'fn []
-            (kaocha.cljs.websocket-client/send!
-             {:type ::fixture-loaded
-              :fixture ['~ns ~before-or-after]})))))
+  (eval `(kaocha.cljs.run/run-once-fixtures
+          ~ns ~before-or-after
+          (~'fn []
+           (kaocha.cljs.websocket-client/send!
+            {:type ::fixture-loaded
+             :fixture ['~ns ~before-or-after]}))))
 
   (queue-consumer {:queue queue
                    :timeout timeout
@@ -310,12 +309,12 @@
   (t/do-report {:type :begin-test-ns})
   (let [js-file (-> ns str (str/replace "-" "_") (str/replace "." "/") (str ".js"))
         done (keyword (gensym "require-ns-done"))]
-    (eval (pr-str `(~'require '~ns)
-                  `((~'fn ~'wait-for-symbol []
-                     (if (~'exists? ~ns)
-                       (kaocha.cljs.websocket-client/send! {:type :cljs/exists :symbol '~ns})
-                       (js/setTimeout ~'wait-for-symbol 50))))
-                  done))
+    (eval `(~'require '~ns))
+    (eval `((~'fn ~'wait-for-symbol []
+             (if (~'exists? ~ns)
+               (kaocha.cljs.websocket-client/send! {:type :cljs/exists :symbol '~ns})
+               (js/setTimeout ~'wait-for-symbol 50)))))
+    (eval done)
 
     (queue-consumer {:queue queue
                      :timeout timeout
@@ -334,9 +333,9 @@
   (run-once-fixtures testable ns :before)
 
   (let [tests (map #(assoc %
-                           ::eval eval
-                           ::timeout timeout
-                           ::queue queue)
+                      ::eval eval
+                      ::timeout timeout
+                      ::queue queue)
                    (:kaocha.test-plan/tests testable))
         result (testable/run-testables tests test-plan)
         timeout? (some ::timeout? result)]
@@ -352,8 +351,11 @@
               ::timeout? true}))))
 
 (defn run-test [{::keys [test eval queue timeout]}]
-  (let [done (str ":" (gensym (str test "-done")))]
-    (eval (str "(kaocha.cljs.run/run-test " test ") " done))
+  (let [done (keyword (gensym (str test "-done")))]
+    (eval `(do
+             (kaocha.cljs.run/run-test  ~test)
+             ~done))
+
     (queue-consumer
      {:queue queue
       :timeout timeout
@@ -365,7 +367,7 @@
 
       :result (fn [{last-val :cljs/last-val
                     last-test :cljs.test/last-finished-test}]
-                (and (= done last-val)
+                (and (= (str done) last-val)
                      (= test last-test)))})))
 
 (defmethod testable/-run ::test [{::keys          [test eval queue timeout]

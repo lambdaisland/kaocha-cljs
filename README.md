@@ -113,7 +113,7 @@ To see all messages coming in over the PREPL and Websocket you can set
 <!-- license-epl -->
 ## License
 
-Copyright &copy; 2018 Arne Brasseur
+Copyright &copy; 2019 Arne Brasseur
 
 Available under the terms of the Eclipse Public License 1.0, see LICENSE.txt
 <!-- /license-epl -->

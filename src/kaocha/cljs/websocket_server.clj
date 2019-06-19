@@ -21,9 +21,9 @@
       (.put queue {:type ::connect :client con})
       (ws/on-receive con (fn [msg]
                            (let [msg (from-transit msg)]
-                             (.offer queue {:type ::message :client con :message msg}))))
+                             (.add queue {:type ::message :client con :message msg}))))
       (ws/on-close con (fn [status]
-                         (.offer queue {:type ::disconnect :client con}))))))
+                         (.add queue {:type ::disconnect :client con}))))))
 
 (defn send! [client message]
   (ws/send! client (to-transit message) false))

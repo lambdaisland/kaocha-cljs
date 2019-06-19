@@ -1,10 +1,10 @@
 # Unreleased
 
-## Added
-
-## Fixed
-
 ## Changed
+
+- Instead of using the ClojureScript PREPL we now use a queue based solution
+  that bypasses the need for a Reader. This should hopefully lead to better
+  reliability.
 
 # 0.0-32 (2019-04-23 / 3d46a25)
 
