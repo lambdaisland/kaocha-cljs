@@ -6,6 +6,10 @@
   that bypasses the need for a Reader. This should hopefully lead to better
   reliability.
 
+## Fixed
+
+- Correctly pass custom compiler-options to the prepl
+
 # 0.0-32 (2019-04-23 / 3d46a25)
 
 ## Fixed
