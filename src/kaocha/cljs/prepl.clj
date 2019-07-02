@@ -4,15 +4,14 @@
             [clojure.tools.reader.reader-types :as ctr.types])
   (:import [java.util.concurrent BlockingQueue LinkedBlockingQueue]))
 
-(defn prepl [repl-env ^BlockingQueue queue]
+(defn prepl [repl-env compiler-opts ^BlockingQueue queue]
   (let [eval-queue (LinkedBlockingQueue.)
         eval       (fn [form] (.add eval-queue form))
-        opts       {}
         out-fn     #(.add queue (let [tag (:tag %)]
                                   (assoc (dissoc % :tag) :type (keyword "cljs" (name tag)))))]
     (future
       (try
-        (qel/start! repl-env opts eval-queue out-fn)
+        (qel/start! repl-env compiler-opts eval-queue out-fn)
         (.add queue {:type ::exit})
         (catch Exception e
           (.add queue {:type ::exit})

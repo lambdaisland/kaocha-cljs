@@ -211,12 +211,15 @@
   (while (.poll cljs.repl.server/connq))
   (while (.poll cljs.repl.server/promiseq))
 
+  (when *debug*
+    (println {:cljs/compiler-options (closure/add-implicit-options compiler-options)}))
+
   (let [queue    (LinkedBlockingQueue.)
         renv     (do (require (symbol (namespace repl-env)))
                      (mapply (resolve repl-env) compiler-options))
         stop-ws! (ws/start! queue)]
     (try
-      (let [eval (prepl/prepl renv queue)
+      (let [eval (prepl/prepl renv compiler-options queue)
             done (keyword (gensym "require-websocket-client-done"))
             eval (if *debug*
                    (fn [form]
@@ -304,7 +307,6 @@
                    :result (fn [state]
                              (get-in state [:loaded-fixtures ns before-or-after]))}))
 
-
 (defmethod testable/-run ::ns [{::keys [ns eval queue timeout] :as testable} test-plan]
   (t/do-report {:type :begin-test-ns})
   (let [js-file (-> ns str (str/replace "-" "_") (str/replace "." "/") (str ".js"))
@@ -328,7 +330,6 @@
                                (and last-val exists
                                     (= (str done) last-val)
                                     (= ns exists)))}))
-
 
   (run-once-fixtures testable ns :before)
 
