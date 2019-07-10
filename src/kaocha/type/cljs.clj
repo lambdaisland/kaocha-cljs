@@ -2,6 +2,7 @@
   (:refer-clojure :exclude [symbol])
   (:require [cljs.analyzer :as ana]
             [cljs.compiler :as comp]
+            [cljs.build.api]
             [cljs.env :as env]
             [cljs.repl :as repl]
             cljs.repl.server
@@ -69,14 +70,15 @@
                                 (ns-testable ns-sym ns-file))))
                           test-files)]
     (assoc testable
-      :cljs/compiler-options options
-      :cljs/repl-env repl-env
-      :cljs/timeout timeout
-      :kaocha.test-plan/tests
-      (env/with-compiler-env cenv
-        (comp/with-core-cljs {}
-          (fn []
-            (testable/load-testables testables)))))))
+           :cljs/compiler-options options
+           :cljs/repl-env repl-env
+           :cljs/timeout timeout
+           :kaocha.test-plan/tests
+           (env/with-compiler-env cenv
+             (cljs.build.api/build "src" options)
+             (comp/with-core-cljs {}
+               (fn []
+                 (testable/load-testables testables)))))))
 
 (defmethod testable/-load ::ns [testable]
   (let [ns-name (::ns testable)

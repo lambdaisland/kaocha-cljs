@@ -1,5 +1,6 @@
 (ns kaocha.cljs.websocket-client
   (:require [kaocha.cljs.cognitect.transit :as transit]
+            [kaocha.cljs.websocket :as ws]
             [pjstadig.print :as humane-print]
             [cljs.pprint :as pp :include-macros true]
             [cljs.test :as t]
@@ -7,21 +8,13 @@
             [goog.dom :as gdom]
             [goog.log :as glog]
             [goog.object :as gobj]
+            [lambdaisland.glogi :as glogi]
+            [lambdaisland.glogi.console :as glogi.console]
             [clojure.browser.repl :as browser-repl])
   (:import [goog.string StringBuffer]))
 
-(defonce logger (glog/getLogger "Kaocha CLJS Client"))
-
-(def WebSocket
-  (cond
-    (exists? js/WebSocket)
-    js/WebSocket
-
-    (exists? js/require)
-    (js/require "isomorphic-ws")
-
-    :else
-    (throw (ex-info "No WebSocket implementation found." {}))))
+(glogi.console/install!)
+(glogi/set-level (str *ns*) :all)
 
 (def socket nil)
 
@@ -47,8 +40,10 @@
   (transit/read (transit/reader :json) string))
 
 (defn send! [message]
-  (when (and socket (= (.-readyState socket) (.-OPEN socket)))
-    (.send socket (to-transit message))))
+  (assert (ws/open? socket))
+  (glogi/debug :websocket/send message)
+  (when (ws/open? socket)
+    (ws/send! socket (to-transit message))))
 
 (defn pretty-print-failure [m]
   (let [buffer (StringBuffer.)]
@@ -112,29 +107,32 @@
 (t/update-current-env! [:reporter] (constantly :kaocha.type/cljs))
 
 (defn connect! []
-  (let [sock (WebSocket. "ws://localhost:9753")]
-    (set! socket sock)
+  (set! socket
+        (ws/connect! "ws://localhost:9753/"
+                     {:open
+                      (fn [e]
+                        (glogi/info :websocket {:callback :onopen :event e})
+                        (send! {:type ::connected
+                                :browser? (exists? js/document)}))
 
-    (set! (.-onopen socket)
-          (fn [e]
-            (send! {:type ::connected
-                    :browser? (exists? js/document)})))
+                      :error
+                      (fn [e]
+                        (glogi/info :websocket {:callback :onerror :event e})
+                        (prn :error e))
 
-    (set! (.-onerror socket)
-          (fn [e]
-            (prn :error e)))
+                      :message
+                      (fn [e]
+                        (glogi/info :websocket {:callback :onmessage :event e})
+                        (prn :message (from-transit (ws/message-data e))))
 
-    (set! (.-onmessage socket)
-          (fn [e]
-            (prn :message (from-transit (.-data e)))))
-
-    (set! (.-onclose socket)
-          (fn [e]
-            (prn :close e)))))
+                      :close
+                      (fn [e]
+                        (glogi/info :websocket {:callback :onclose :event e})
+                        (prn :close e))})))
 
 (defn disconnect! []
   (when socket
-    (set! (.-onclose socket) (fn [_]))
-    (.close socket)))
+    (glogi/info :msg "Disconnecting websocket")
+    (ws/close! socket)))
 
 (kaocha.cljs.websocket-client/connect!)
