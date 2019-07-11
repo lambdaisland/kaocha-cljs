@@ -75,7 +75,7 @@
            :cljs/timeout timeout
            :kaocha.test-plan/tests
            (env/with-compiler-env cenv
-             (cljs.build.api/build "src" options)
+             (cljs.build.api/build "journal/browser_test" options)
              (comp/with-core-cljs {}
                (fn []
                  (testable/load-testables testables)))))))
