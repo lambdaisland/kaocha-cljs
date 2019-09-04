@@ -63,8 +63,11 @@
           (gobj/set goog.global "WebSocket" nil)
           result)))))
 
-(defn make-websocket ^goog.net.WebSocket []
-  (ensure-websocket #(goog.net.WebSocket.)))
+(defn make-websocket ^goog.net.WebSocket
+  ([]
+   (make-websocket true))
+  ([reconnect?]
+   (ensure-websocket #(goog.net.WebSocket. reconnect?))))
 
 (defn register-handlers* [^goog.net.WebSocket ws handler-map]
   (doseq [[type handler-fn] handler-map]
@@ -81,12 +84,15 @@
 (defn open! [^goog.net.WebSocket ws url]
   (ensure-websocket #(open! ws url)))
 
-(defn connect! [url handler-map]
-  (ensure-websocket
-   #(let [ws (goog.net.WebSocket.)]
-      (register-handlers* ws handler-map)
-      (open!* ws url)
-      ws)))
+(defn connect!
+  ([url handler-map]
+   (connect! url handler-map true))
+  ([url handler-map reconnect?]
+   (ensure-websocket
+    #(let [ws (goog.net.WebSocket. reconnect?)]
+       (register-handlers* ws handler-map)
+       (open!* ws url)
+       ws))))
 
 (defn send! [^goog.net.WebSocket ws msg]
   (ensure-websocket #(.send ws msg)))

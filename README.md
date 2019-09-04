@@ -32,10 +32,10 @@ Note that you must be using at least Clojure 1.10.
           }]}
 ```
 
-For nodejs, install `ws` and `isomorphic-ws`
+For nodejs, install `ws`.
 
 ```
-npm i isomorphic-ws ws
+npm i ws
 ```
 
 Run your tests
@@ -43,6 +43,38 @@ Run your tests
 ```
 clojure -m kaocha.runner unit-cljs
 ```
+
+## Configuration
+
+- `:kaocha/source-paths` (or `:source-paths` when using `#kaocha/v1`) <br>
+  The location of your ClojureScript source paths (vector)
+- `:kaocha/test-paths` (or `:source-paths` when using `#kaocha/v1`) <br>
+  The location of your ClojureScript test paths (vector)
+- `:cljs/timeout` <br> Time in miliseconds before timing out. This timeout gets
+  reset whenever we receive an event from the ClojureScript environment, like a
+  cljs.test event, or something being written to stdout. Once there is no
+  activity for `:cljs/timeout` seconds, the test fails. This also causes
+  subsequent tests are skipped, because we assume the ClojureScript runtime is
+  no longer responsive.
+- `:cljs/repl-env` <br> A function (var) name which takes ClojureScript Compiler
+  options, and returns a REPL environment. Values you can use include
+  - `cljs.repl.node/repl-env`
+  - `cljs.repl.browser/repl-env`
+  - `figwheel.repl/repl-env`
+- `:cljs/compiler-options` <br> Additional compiler options, defaults to `{}`.
+- `:cljs/precompile?` <br> Invoke `cljs.build.api/build` before launching the
+  REPL. Certain REPL types like Figwheel REPL require an initial build before
+  the REPL is able to connect. If this is the case you can set this to `true`.
+  Defaults to `false`.
+
+## Known issues
+
+The `:test-paths` do not get automatically added to the classpath (at least not
+in a way that makes the sources visible to ClojureScript), so you need to also
+have any `:test-paths` in your `project.clj`/`deps.edn`/`build.boot`.
+
+This is a discrepancy with regular Kaocha, where you only need to specify the
+test paths once.
 
 ## Architecture
 
