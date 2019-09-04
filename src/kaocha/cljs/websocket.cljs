@@ -49,6 +49,7 @@
    (and (= host-env :node)
         (try (js/require "ws")
              (catch js/Error e
+               (js/console.log "NODE_WS_NOT_FOUND")
                nil)))
    (and (= host-env :worker)
         (gobj/get js/self "WebSocket"))))

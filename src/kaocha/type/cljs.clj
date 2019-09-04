@@ -106,13 +106,13 @@
   {::ws/connect
    (fn [_ state]
      (assoc state
-       :ws/connected? true))
+            :ws/connected? true))
 
    ::ws/disconnect
    (fn [_ state]
      (assoc state
-       :ws/disconnected? true
-       :ws/connected? false))
+            :ws/disconnected? true
+            :ws/connected? false))
 
    :cljs.test/message
    (fn [msg state]
@@ -153,8 +153,8 @@
    :kaocha.cljs.websocket-client/connected
    (fn [msg state]
      (assoc state
-       :ws-client/ack? true
-       :repl-env/browser? (:browser? msg)))
+            :ws-client/ack? true
+            :repl-env/browser? (:browser? msg)))
 
    :kaocha.cljs.run/test-finished
    (fn [{:keys [test]} state]
@@ -187,7 +187,8 @@
             (recur (poll) state)))))))
 
 (defn- alive? [^Process proc]
-  (try (.exitValue proc) false (catch IllegalThreadStateException _ true)))
+  (when proc
+    (try (.exitValue proc) false (catch IllegalThreadStateException _ true))))
 
 (defn- kill! [^Process proc]
   (when (alive? proc)
@@ -232,7 +233,8 @@
                    (fn [form]
                      (println "EVAL: " form)
                      (eval form))
-                   eval)]
+                   eval)
+            limited-testable (select-keys testable [:kaocha.testable/id :cljs/repl-env :cljs/compiler-options])]
         (try
           (eval '(require 'kaocha.cljs.websocket-client
                           'kaocha.cljs.run))
@@ -248,11 +250,19 @@
                                           (= (str done) val)
                                           (assoc :eval-done? true)))
 
+                                      :cljs/out
+                                      (fn [{:keys [val]} state]
+                                        (if (= "NODE_WS_NOT_FOUND\n" val)
+                                          (throw (ex-info "Nodejs: require('ws') failed, make sure to 'npm install ws'."
+                                                          (merge limited-testable state)))
+                                          (println val))
+                                        state)
+
                                       :timeout
-                                      (fn [{:keys [eval-done?]}]
+                                      (fn [{:keys [eval-done?] :as state}]
                                         (if eval-done?
-                                          (throw (ex-info "Failed initializing ClojureScript runtime" testable))
-                                          (throw (ex-info "Kaocha ClojureScript client failed connecting back." testable))))}
+                                          (throw (ex-info "Failed initializing ClojureScript runtime" (merge limited-testable state)))
+                                          (throw (ex-info "Kaocha ClojureScript client failed connecting back." (merge limited-testable state)))))}
 
                            :result (fn [state]
                                      (and (:eval-done? state)
@@ -295,7 +305,7 @@
       (finally
         (try-all
          (when-let [proc (:proc renv)] (kill! @proc))
-         (repl/tear-down renv)
+         (try (repl/tear-down renv) (catch Exception e))
          (stop-ws!))))))
 
 (defn run-once-fixtures [{::keys [queue timeout eval]} ns before-or-after]
