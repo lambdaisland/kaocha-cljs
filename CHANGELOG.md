@@ -2,9 +2,16 @@
 
 ## Added
 
+- Added compatibility with Figwheel REPL
+
 ## Fixed
 
+- Use the same compiler env for the load and run stages
+
 ## Changed
+
+- isomorphic-ws is no longer needed on Node (ws still is)
+- rework the websocket connection to be more reliable
 
 # 0.0-40 (2019-07-02 / d0324dd)
 

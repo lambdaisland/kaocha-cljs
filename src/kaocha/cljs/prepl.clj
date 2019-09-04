@@ -1,17 +1,17 @@
 (ns kaocha.cljs.prepl
-  (:require [kaocha.cljs.queue-eval-loop :as qel]
-            [clojure.java.io :as io]
-            [clojure.tools.reader.reader-types :as ctr.types])
+  (:require [cljs.env :as env]
+            [kaocha.cljs.queue-eval-loop :as qel])
   (:import [java.util.concurrent BlockingQueue LinkedBlockingQueue]))
 
-(defn prepl [repl-env compiler-opts ^BlockingQueue queue]
+(defn prepl [repl-env compiler-env compiler-opts ^BlockingQueue queue]
   (let [eval-queue (LinkedBlockingQueue.)
         eval       (fn [form] (.add eval-queue form))
         out-fn     #(.add queue (let [tag (:tag %)]
                                   (assoc (dissoc % :tag) :type (keyword "cljs" (name tag)))))]
     (future
       (try
-        (qel/start! repl-env compiler-opts eval-queue out-fn)
+        (env/with-compiler-env compiler-env
+          (qel/start! repl-env compiler-opts eval-queue out-fn))
         (.add queue {:type ::exit})
         (catch Exception e
           (.add queue {:type ::exit})

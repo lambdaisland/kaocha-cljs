@@ -2,6 +2,7 @@
   (:refer-clojure :exclude [symbol])
   (:require [cljs.analyzer :as ana]
             [cljs.compiler :as comp]
+            [cljs.build.api]
             [cljs.env :as env]
             [cljs.repl :as repl]
             cljs.repl.server
@@ -56,27 +57,33 @@
   (ctn.parse/name-from-ns-decl (ctn.file/read-file-ns-decl f)))
 
 (defmethod testable/-load :kaocha.type/cljs [testable]
-  (let [options     (:cljs/compiler-options testable {})
-        repl-env    (:cljs/repl-env testable 'cljs.repl.node/repl-env)
-        timeout     (:cljs/timeout testable 10000)
-        test-paths  (map io/file (:kaocha/test-paths testable))
-        ns-patterns (map regex (:kaocha/ns-patterns testable))
-        test-files  (find-cljs-sources-in-dirs test-paths)
-        cenv        (env/default-compiler-env (closure/add-implicit-options options))
-        testables   (keep (fn [ns-file]
-                            (let [ns-sym (file->ns-name ns-file)]
-                              (when (load/ns-match? ns-patterns ns-sym)
-                                (ns-testable ns-sym ns-file))))
-                          test-files)]
+  (let [copts        (:cljs/compiler-options testable {})
+        repl-env     (:cljs/repl-env testable 'cljs.repl.node/repl-env)
+        timeout      (:cljs/timeout testable 10000)
+        source-paths (map io/file (:kaocha/source-paths testable))
+        test-paths   (map io/file (:kaocha/test-paths testable))
+        ns-patterns  (map regex (:kaocha/ns-patterns testable))
+        test-files   (find-cljs-sources-in-dirs test-paths)
+        cenv         (env/default-compiler-env (closure/add-implicit-options copts))
+        precompile?  (:cljs/precompile? testable
+                                        (get '#{figwheel.repl/repl-env} repl-env false))
+        testables    (keep (fn [ns-file]
+                             (let [ns-sym (file->ns-name ns-file)]
+                               (when (load/ns-match? ns-patterns ns-sym)
+                                 (ns-testable ns-sym ns-file))))
+                           test-files)]
     (assoc testable
-      :cljs/compiler-options options
-      :cljs/repl-env repl-env
-      :cljs/timeout timeout
-      :kaocha.test-plan/tests
-      (env/with-compiler-env cenv
-        (comp/with-core-cljs {}
-          (fn []
-            (testable/load-testables testables)))))))
+           :cljs/compiler-options copts
+           :cljs/repl-env repl-env
+           :cljs/timeout timeout
+           :cljs/compiler-env cenv
+           :kaocha.test-plan/tests
+           (env/with-compiler-env cenv
+             (when precompile?
+               (cljs.build.api/build (into #{} cat [source-paths test-paths]) copts))
+             (comp/with-core-cljs {}
+               (fn []
+                 (testable/load-testables testables)))))))
 
 (defmethod testable/-load ::ns [testable]
   (let [ns-name (::ns testable)
@@ -202,7 +209,7 @@
        (finally
          (try-all ~@(next forms))))))
 
-(defmethod testable/-run :kaocha.type/cljs [{:cljs/keys [compiler-options repl-env timeout] :as testable} test-plan]
+(defmethod testable/-run :kaocha.type/cljs [{:cljs/keys [compiler-options compiler-env repl-env timeout] :as testable} test-plan]
   (t/do-report {:type :begin-test-suite})
 
   ;; Somehow these don't get cleaned up properly, leading to issues when
@@ -219,7 +226,7 @@
                      (mapply (resolve repl-env) compiler-options))
         stop-ws! (ws/start! queue)]
     (try
-      (let [eval (prepl/prepl renv compiler-options queue)
+      (let [eval (prepl/prepl renv compiler-env compiler-options queue)
             done (keyword (gensym "require-websocket-client-done"))
             eval (if *debug*
                    (fn [form]
@@ -227,8 +234,8 @@
                      (eval form))
                    eval)]
         (try
-          (eval '(require 'kaocha.cljs.websocket-client))
-          (eval '(require-macros 'kaocha.cljs.run))
+          (eval '(require 'kaocha.cljs.websocket-client
+                          'kaocha.cljs.run))
           (eval done)
 
           (queue-consumer {:queue queue
@@ -252,9 +259,9 @@
                                           (:ws-client/ack? state)))})
 
           (let [tests (testable/run-testables (map #(assoc %
-                                                      ::eval eval
-                                                      ::queue queue
-                                                      ::timeout timeout)
+                                                           ::eval eval
+                                                           ::queue queue
+                                                           ::timeout timeout)
                                                    (:kaocha.test-plan/tests testable))
                                               test-plan)
                 timeout? (some ::timeout? tests)]
