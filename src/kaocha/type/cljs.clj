@@ -32,8 +32,8 @@
 ;; Set in tests.edn with {:bindings {kaocha.type.cljs/*debug* true}}
 (def ^:dynamic *debug* false)
 
-(require 'kaocha.cljs.print-handlers)
-(require 'kaocha.type.var) ;; load the hierarchy for :kaocha.type.var/zero-assertions
+(require 'kaocha.cljs.print-handlers
+         'kaocha.type.var) ;; (defmethod report/fail-summary ::zero-assertions)
 
 (defn ns-testable [ns-sym ns-file]
   {::testable/type ::ns
@@ -57,12 +57,14 @@
   (ctn.parse/name-from-ns-decl (ctn.file/read-file-ns-decl f)))
 
 (defmethod testable/-load :kaocha.type/cljs [testable]
-  (let [copts        (cond-> (:cljs/compiler-options testable {})
+  (let [repl-env     (:cljs/repl-env testable 'cljs.repl.node/repl-env)
+        copts        (cond-> (:cljs/compiler-options testable {})
                        *debug*
                        (update :closure-defines assoc
                                `log-level "DEBUG"
-                               `root-log-level "DEBUG"))
-        repl-env     (:cljs/repl-env testable 'cljs.repl.node/repl-env)
+                               `root-log-level "DEBUG")
+                       (= 'cljs.repl.node/repl-env repl-env)
+                       (assoc :target :nodejs))
         timeout      (:cljs/timeout testable 15000)
         source-paths (map io/file (:kaocha/source-paths testable))
         test-paths   (map io/file (:kaocha/test-paths testable))
@@ -240,6 +242,9 @@
                    eval)
             limited-testable (select-keys testable [:kaocha.testable/id :cljs/repl-env :cljs/compiler-options])]
         (try
+          (when (io/resource "matcher_combinators/model.cljc")
+            (eval '(require 'matcher-combinators.model)))
+
           (eval '(require 'kaocha.cljs.websocket-client
                           'kaocha.cljs.run))
           (eval done)

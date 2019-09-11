@@ -4,6 +4,27 @@
   (:import [java.io ByteArrayInputStream ByteArrayOutputStream]
            java.util.concurrent.BlockingQueue))
 
+(try
+  (require 'matcher-combinators.model)
+  (catch Exception e))
+
+(def handlers
+  (reduce
+   (fn [handlers sym]
+     (if-let [var (resolve (symbol (str "matcher-combinators.model/map->" sym)))]
+       (assoc handlers
+              (str "matcher-combinators.model." sym)
+              (transit/read-handler @var))
+       handlers))
+   {"var" (transit/read-handler identity)}
+   '[Mismatch
+     Missing
+     Unexpected
+     InvalidMatcherType
+     InvalidMatcherContext
+     FailedPredicate
+     TypeMismatch]))
+
 (defn to-transit [value]
   (let [out (ByteArrayOutputStream. 4096)
         writer (transit/writer out :json)]
@@ -12,7 +33,7 @@
 
 (defn from-transit [^String transit]
   (let [in (ByteArrayInputStream. (.getBytes transit))
-        reader (transit/reader in :json {:handlers {"var" (transit/read-handler identity)}})]
+        reader (transit/reader in :json {:handlers handlers})]
     (transit/read reader)))
 
 (defn ws-handler [^BlockingQueue queue]

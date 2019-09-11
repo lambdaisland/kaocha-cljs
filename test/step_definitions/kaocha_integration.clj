@@ -87,7 +87,7 @@
     (binding [*out* deps-out]
       (with-print-namespace-maps false
         (clojure.pprint/pprint {:paths ["src" "test"]
-                                :deps {'org.clojure/clojure           {:mvn/version "1.10.0-RC5"}
+                                :deps {'org.clojure/clojure           {:mvn/version "RELEASE"}
                                        'lambdaisland/kaocha-cljs      {:local/root (project-dir-path)}
                                        'lambdaisland/kaocha-cloverage {:mvn/version "RELEASE"}}})))))
 
