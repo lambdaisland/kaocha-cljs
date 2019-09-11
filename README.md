@@ -142,6 +142,23 @@ To see all messages coming in over the PREPL and Websocket you can set
  :bindings {kaocha.type.cljs/*debug* true}}
 ```
 
+This will also set the `goog.log` root logger, and the
+`kaocha.cljs.websocket-client` logger both to the `DEBUG` level. Have a look at
+[glogi](https://github.com/lambdaisland/glogi) for more information about Google
+Closure's logging facilities.
+
+When not using `*debug*` you can still set these log levels seperately through
+`:closure-defines`.
+
+``` clojure
+#kaocha/v1
+{:tests [{:type :kaocha.type/cljs
+          :cljs/compiler-options {:closure-defines {kaocha.type.cljs/log-level "ALL"
+                                                    kaocha.type.cljs/root-log-level "INFO"}}}]}
+;; Log levels:
+;; OFF SHOUT SEVERE WARNING INFO CONFIG FINE FINER FINEST ALL
+```
+
 <!-- license-epl -->
 ## License
 

@@ -1,6 +1,7 @@
 (ns kaocha.cljs.websocket-client
   (:require [kaocha.cljs.cognitect.transit :as transit]
             [kaocha.cljs.websocket :as ws]
+            [kaocha.type.cljs]
             [pjstadig.print :as humane-print]
             [cljs.pprint :as pp :include-macros true]
             [cljs.test :as t]
@@ -9,12 +10,10 @@
             [goog.log :as glog]
             [goog.object :as gobj]
             [lambdaisland.glogi :as glogi]
-            [lambdaisland.glogi.console :as glogi.console]
             [clojure.browser.repl :as browser-repl])
   (:import [goog.string StringBuffer]))
 
-(glogi.console/install!)
-(glogi/set-level (str *ns*) :all)
+(glogi/set-level (str *ns*) (keyword (str/lower-case kaocha.type.cljs/log-level)))
 
 (def socket nil)
 
