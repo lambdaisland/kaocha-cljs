@@ -41,7 +41,7 @@ Feature: Basic assertions
       {:tests [{:type :kaocha.type/cljs}]
        :color? false}
       """
-    When I run `npm install ws isomorphic-ws`
+    When I run `npm install ws`
     And I run `bin/kaocha`
     Then the output should contain:
       """
