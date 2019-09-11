@@ -56,12 +56,14 @@
   (ctn.parse/name-from-ns-decl (ctn.file/read-file-ns-decl f)))
 
 (defmethod testable/-load :kaocha.type/cljs [testable]
-  (let [copts        (cond-> (:cljs/compiler-options testable {})
+  (let [repl-env     (:cljs/repl-env testable 'cljs.repl.node/repl-env)
+        copts        (cond-> (:cljs/compiler-options testable {})
                        *debug*
                        (update :closure-defines assoc
                                `log-level "DEBUG"
-                               `root-log-level "DEBUG"))
-        repl-env     (:cljs/repl-env testable 'cljs.repl.node/repl-env)
+                               `root-log-level "DEBUG")
+                       (= 'cljs.repl.node/repl-env repl-env)
+                       (assoc :target :nodejs))
         timeout      (:cljs/timeout testable 15000)
         source-paths (map io/file (:kaocha/source-paths testable))
         test-paths   (map io/file (:kaocha/test-paths testable))
