@@ -71,6 +71,11 @@
       <version>0.8.313</version>
     </dependency>
     <dependency>
+      <groupId>lambdaisland</groupId>
+      <artifactId>glogi</artifactId>
+      <version>RELEASE</version>
+    </dependency>
+    <dependency>
       <groupId>http-kit</groupId>
       <artifactId>http-kit</artifactId>
       <version>2.3.0</version>
