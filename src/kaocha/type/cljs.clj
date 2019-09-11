@@ -32,7 +32,8 @@
 ;; Set in tests.edn with {:bindings {kaocha.type.cljs/*debug* true}}
 (def ^:dynamic *debug* false)
 
-(require 'kaocha.cljs.print-handlers)
+(require 'kaocha.cljs.print-handlers
+         'kaocha.type.var) ;; (defmethod report/fail-summary ::zero-assertions)
 
 (defn ns-testable [ns-sym ns-file]
   {::testable/type ::ns
