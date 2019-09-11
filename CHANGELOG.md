@@ -3,6 +3,7 @@
 ## Added
 
 - Added compatibility with Figwheel REPL
+- Make the CLJS-side logging configurable with `:closure-defines`
 
 ## Fixed
 
