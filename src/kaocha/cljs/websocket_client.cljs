@@ -11,24 +11,52 @@
             [goog.object :as gobj]
             [lambdaisland.glogi :as glogi]
             [clojure.browser.repl :as browser-repl])
-  (:import [goog.string StringBuffer]))
+  (:import [goog.string StringBuffer])
+  (:require-macros [kaocha.cljs.hierarchy :as hierarchy]))
 
 (glogi/set-level (str *ns*) (keyword (str/lower-case kaocha.type.cljs/log-level)))
 
 (def socket nil)
 
-(def transit-handlers
-  {:default
-   (transit/write-handler
-    (fn [o]
-      (str (type o)))
-    (fn [o]
-      (str o)))
+(defn record-handler [type]
+  (transit/write-handler (constantly type)
+                         (fn [val]
+                           (into {} val))))
 
-   cljs.core/Var
-   (transit/write-handler
-    (constantly "var")
-    (fn [rep] (meta rep)))})
+
+(def transit-handlers
+  (merge {:default
+          (transit/write-handler
+           (fn [o]
+             (str (type o)))
+           (fn [o]
+             (str o)))
+
+          cljs.core/Var
+          (transit/write-handler
+           (constantly "var")
+           (fn [rep] (meta rep)))}
+         (when (exists? matcher-combinators.model/Mismatch)
+           {^:cljs.analyzer/no-resolve matcher-combinators.model.Mismatch
+            (record-handler "matcher-combinators.model.Mismatch")})
+         (when (exists? matcher-combinators.model/Missing)
+           {^:cljs.analyzer/no-resolve matcher-combinators.model.Missing
+            (record-handler "matcher-combinators.model.Missing")})
+         (when (exists? matcher-combinators.model/Unexpected)
+           {^:cljs.analyzer/no-resolve matcher-combinators.model.Unexpected
+            (record-handler "matcher-combinators.model.Unexpected")})
+         (when (exists? matcher-combinators.model/InvalidMatcherType)
+           {^:cljs.analyzer/no-resolve matcher-combinators.model.InvalidMatcherType
+            (record-handler "matcher-combinators.model.InvalidMatcherType")})
+         (when (exists? matcher-combinators.model/InvalidMatcherContext)
+           {^:cljs.analyzer/no-resolve matcher-combinators.model.InvalidMatcherContext
+            (record-handler "matcher-combinators.model.InvalidMatcherContext")})
+         (when (exists? matcher-combinators.model/FailedPredicate)
+           {^:cljs.analyzer/no-resolve matcher-combinators.model.FailedPredicate
+            (record-handler "matcher-combinators.model.FailedPredicate")})
+         (when (exists? matcher-combinators.model/TypeMismatch)
+           {^:cljs.analyzer/no-resolve matcher-combinators.model.TypeMismatch
+            (record-handler "matcher-combinators.model.TypeMismatch")})))
 
 (def transit-writer (transit/writer :json {:handlers transit-handlers}))
 
@@ -95,12 +123,7 @@
                       (or (:message m) (.-message error)))
                cljs-test-msg))))
 
-(doseq [t [:pass :summary
-           :begin-test-ns :end-test-ns
-           :begin-test-var :end-test-var
-           :begin-run-tests :end-run-tests
-           :begin-test-all-vars :end-test-all-vars
-           :kaocha.report/one-arg-eql]]
+(doseq [t (hierarchy/known-keys)]
   (derive t ::propagate))
 
 (t/update-current-env! [:reporter] (constantly :kaocha.type/cljs))

@@ -33,7 +33,6 @@
 (def ^:dynamic *debug* false)
 
 (require 'kaocha.cljs.print-handlers)
-(require 'kaocha.type.var) ;; load the hierarchy for :kaocha.type.var/zero-assertions
 
 (defn ns-testable [ns-sym ns-file]
   {::testable/type ::ns
@@ -240,6 +239,9 @@
                    eval)
             limited-testable (select-keys testable [:kaocha.testable/id :cljs/repl-env :cljs/compiler-options])]
         (try
+          (when (io/resource "matcher_combinators/model.cljc")
+            (eval '(require 'matcher-combinators.model)))
+
           (eval '(require 'kaocha.cljs.websocket-client
                           'kaocha.cljs.run))
           (eval done)

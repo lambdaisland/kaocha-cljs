@@ -2,6 +2,8 @@
 
 ## Added
 
+- Added support for matcher-combinators
+
 ## Fixed
 
 ## Changed
