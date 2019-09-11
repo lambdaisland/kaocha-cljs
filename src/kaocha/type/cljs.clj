@@ -63,7 +63,7 @@
                                `log-level "DEBUG"
                                `root-log-level "DEBUG"))
         repl-env     (:cljs/repl-env testable 'cljs.repl.node/repl-env)
-        timeout      (:cljs/timeout testable 10000)
+        timeout      (:cljs/timeout testable 15000)
         source-paths (map io/file (:kaocha/source-paths testable))
         test-paths   (map io/file (:kaocha/test-paths testable))
         ns-patterns  (map regex (:kaocha/ns-patterns testable))
