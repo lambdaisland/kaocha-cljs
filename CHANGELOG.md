@@ -4,8 +4,6 @@
 
 - Added support for matcher-combinators
 
-## Fixed
-
 ## Changed
 
 - When using the nodejs repl type, automatically set the CLJS compile target to :nodejs
