@@ -50,4 +50,4 @@
   (ws/send! client (to-transit message) false))
 
 (defn start! [queue]
-  (ws/run-server (ws-handler queue) {:port 9753 :join? false}))
+  (ws/run-server (ws-handler queue) {:port 0 :join? false}))
