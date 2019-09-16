@@ -231,7 +231,8 @@
   (let [queue    (LinkedBlockingQueue.)
         renv     (do (require (symbol (namespace repl-env)))
                      (mapply (resolve repl-env) compiler-options))
-        stop-ws! (ws/start! queue)]
+        stop-ws! (ws/start! queue)
+        port     (:local-port (meta stop-ws!))]
     (try
       (let [eval (prepl/prepl renv compiler-env compiler-options queue)
             done (keyword (gensym "require-websocket-client-done"))
@@ -247,6 +248,7 @@
 
           (eval '(require 'kaocha.cljs.websocket-client
                           'kaocha.cljs.run))
+          (eval `(kaocha.cljs.websocket-client/connect! ~port))
           (eval done)
 
           (queue-consumer {:queue queue

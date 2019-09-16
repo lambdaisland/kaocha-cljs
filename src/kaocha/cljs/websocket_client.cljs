@@ -128,9 +128,9 @@
 
 (t/update-current-env! [:reporter] (constantly :kaocha.type/cljs))
 
-(defn connect! []
+(defn connect! [port]
   (set! socket
-        (ws/connect! "ws://localhost:9753/"
+        (ws/connect! (str "ws://localhost:" port "/")
                      {:open
                       (fn [e]
                         (glogi/info :websocket {:callback :onopen :event e})
@@ -156,5 +156,3 @@
   (when socket
     (glogi/info :msg "Disconnecting websocket")
     (ws/close! socket)))
-
-(kaocha.cljs.websocket-client/connect!)
