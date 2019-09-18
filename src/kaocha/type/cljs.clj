@@ -242,7 +242,10 @@
                    eval)
             limited-testable (select-keys testable [:kaocha.testable/id :cljs/repl-env :cljs/compiler-options])]
         (try
-          (when (io/resource "matcher_combinators/model.cljc")
+          (eval '(require 'cljs.repl))
+
+          (when (and (:load-matcher-combinators? testable true)
+                     (io/resource "matcher_combinators/model.cljc"))
             (eval '(require 'matcher-combinators.model)))
 
           (eval '(require 'kaocha.cljs.websocket-client
