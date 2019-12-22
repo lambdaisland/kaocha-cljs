@@ -69,12 +69,23 @@ clojure -m kaocha.runner unit-cljs
 
 ## Known issues
 
-The `:test-paths` do not get automatically added to the classpath (at least not
+- The `:test-paths` do not get automatically added to the classpath (at least not
 in a way that makes the sources visible to ClojureScript), so you need to also
 have any `:test-paths` in your `project.clj`/`deps.edn`/`build.boot`.
 
-This is a discrepancy with regular Kaocha, where you only need to specify the
+  This is a discrepancy with regular Kaocha, where you only need to specify the
 test paths once.
+
+- On Linux the `cljs.repl.browser/repl-env` requires the browser process to already be started
+  before running Kaocha (see: <https://clojure.atlassian.net/browse/CLJ-2493>).
+  
+  To support running browser tests on CircleCI add an early config step like:
+  
+  ```
+  - run:
+      command: /usr/bin/google-chrome-stable --no-first-run
+      background: true 
+  ```
 
 ## Architecture
 
