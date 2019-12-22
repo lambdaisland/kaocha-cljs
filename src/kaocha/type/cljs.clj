@@ -248,7 +248,11 @@
 
           (eval '(require 'kaocha.cljs.websocket-client
                           'kaocha.cljs.run))
-          (eval `(kaocha.cljs.websocket-client/connect! ~port))
+
+          (eval `((~'fn ~'wait-for-websocket-client []
+                    (if (~'exists? kaocha.cljs.websocket-client)
+                      (kaocha.cljs.websocket-client/connect! ~port)
+                      (js/setTimeout ~'wait-for-websocket-client 50)))))
           (eval done)
 
           (queue-consumer {:queue queue
