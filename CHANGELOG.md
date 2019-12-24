@@ -6,6 +6,8 @@
 
 ## Changed
 
+- Pick a free port for websockets automatically instead of using a hard-coded port
+
 # 0.0-59 (2019-09-12 / 9159233)
 
 ## Added
