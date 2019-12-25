@@ -1,8 +1,9 @@
 # Unreleased
 
-## Added
-
 ## Fixed
+- Wait for websocket client namespace to load before attempting to connect. This
+  should help in particular with reliability when running against a browser
+  environment.
 
 ## Changed
 
