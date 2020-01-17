@@ -1,0 +1,139 @@
+* kaocha for shadow-cljs
+
+- currently kaocha-cljs uses the cljs.repl-env abstraction, e.g. cljs.node/repl-env
+- kaocha is dynamic in nature, we don't want to compile a blob and just "run" it.
+- we need to make sure kaocha features work as expected
+  - focus/skip
+  - watch
+  - reporters
+  - fail-fast
+  - notifications
+
+REPL >: (require 'foo.bar-test)
+REPL >: (foo.bar-test/baz)
+Websocket <: {:type :test-ns-started} 
+Websocket <: {:type :fail :message "bla"} 
+
+shadow-cljs: 2 options
+
+1. use shadow-cljs.prepl instead of cljs.repl-env
+   Result: separate kaocha-shadow package
+   But: logically very similar to kaocha-cljs, just how tests are triggered is different
+
+2. we no longer use a REPL, but instead compile a "controller" namespace
+   Benefits:
+    - possible to run with advanced (or other levels of) compilation
+    - environment more similar to actual build artifacts and production
+
+Send commands over websocket, get events back (events get propagated to reporter)
+   
+    WS >: {:type :run-test :test 'foo.bar/baz-test}
+    WS <: {:type :fail ,,,}
+
+Generate mapping from test id to test "var", so we can still resolve even when advanced compiled.
+
+    (ns kaocha.cljs.test-map
+      (:require [foo.bar]))
+
+    (def test-id->test-fn
+      {:foo.bar/baz-test foo.bar/baz-test})
+
+
+LOAD: config -> test-plan
+RUN:  test-plan -> test-result
+
+- analyze sources to come up with test-plan (namespaces, test vars, metadata)
+- generate controller namespace (i.e. test id mapping) based on test-plan
+- invoke compiler
+- launch javascript environment
+- communicate over websocket
+
+To do this incrementally, we can start from the end and work our way back
+
+* Tasks
+** make websocket bidirectional 
+
+At the moment the WS is only used for client server communication (i.e. cljs env to kaocha), 
+
+The websocket server (http-kit) is started here:
+
+kaocha.type.cljs:234 (clj)
+
+        stop-ws! (ws/start! queue)
+
+At the moment this takes a single queue, which receives messages that come back
+from the client. We will need a way here to send messages back to the client.
+For example ws/start! could return a =send!= function that sends messages back
+to the client.
+
+        [stop-ws! send!] (ws/start! queue)
+
+kaocha.cljs.websocket-client:145 (cljs)
+                      :message
+                      (fn [e]
+                        (glogi/info :websocket {:callback :onmessage :event e})
+                        (prn :message (from-transit (ws/message-data e))))
+
+This is where we receive messages on the client side, so here we need a way to
+dispatch for specific commands.
+
+So on the server we could do something like this
+
+(send! [:kaocha/run-test! :foo.bar/baz-test])
+
+And perhaps there would be a multimethod for this
+
+  #+begin_src 
+(defmethod handle-message :kaocha/run-test! [[_ test-id]]
+  ,, find test in table and run it ,,) 
+  #+end_src
+
+At this point we need to be able to look up the test, so we need this test
+lookup table, so we need to generate some code...
+
+
+    (ns kaocha.cljs.test-map
+      (:require [foo.bar]))
+
+    (def test-id->test-fn
+      {:foo.bar/baz-test foo.bar/baz-test})
+
+- where to put this file? ideally in some kind of hidden/temp directory, but..
+  haven't figured out yet how to make sure ClojureScript compiler can find it
+  when it's not on the class path.
+  -> so maybe for now put it under (first (:kaocha.testable/test-paths test-suite))
+
+- code can be generated at the end of the =-load= or at the start of the =-run-=
+  step, not sure at this point which is best.
+
+(ns kaocha.cljs.controller
+  (require [...websocket-client :as ws ;; exists, but add defmulti
+            ...test-map :as tm])) ;; generated
+
+(defmethod ws/handle-event :kaocha/run-test! [ [_ id] ]
+  (... run-test ... (tm/test-id->test id))
+
+
+* challenges
+** Reuse JS environment
+
+In case of REPL or `--watch` use you would want to reuse the same JS env, e.g.
+reconnect to existing browser tab. So this basically means hot code reloading a
+la figwheel/shadow.
+
+** Pluggable compilation
+
+Shadow has a different build api from the standard clojurescript compiler, this
+needs to be pluggable/configurable.
+
+** Output and error capturing
+
+Currently the repl-env takes care of hooking up out/err capturing and sending it
+back to the process, we will have to do that ourselves, propagating output to
+websocket messages.
+
+
+
+
+
+   
