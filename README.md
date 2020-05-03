@@ -13,7 +13,7 @@ ClojureScript support for Kaocha.
 ``` clojure
 ;; deps.edn
 {:deps {lambdaisland/kaocha {...}
-        lambdaisland/kaocha-cljs {...}}}
+        lambdaisland/kaocha-cljs {:mvn/version "0.0-71"}}}
 ```
 
 Note that you must be using at least Clojure 1.10.
@@ -78,13 +78,13 @@ test paths once.
 
 - On Linux the `cljs.repl.browser/repl-env` requires the browser process to already be started
   before running Kaocha (see: <https://clojure.atlassian.net/browse/CLJ-2493>).
-  
+
   To support running browser tests on CircleCI add an early config step like:
-  
+
   ```
   - run:
       command: /usr/bin/google-chrome-stable --no-first-run
-      background: true 
+      background: true
   ```
 
 ## Architecture
