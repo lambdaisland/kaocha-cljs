@@ -50,7 +50,7 @@ clojure -m kaocha.runner unit-cljs
   The location of your ClojureScript source paths (vector)
 - `:kaocha/test-paths` (or `:source-paths` when using `#kaocha/v1`) <br>
   The location of your ClojureScript test paths (vector)
-- `:cljs/timeout` <br> Time in miliseconds before timing out. This timeout gets
+- `:cljs/timeout` <br> Time in milliseconds before timing out. This timeout gets
   reset whenever we receive an event from the ClojureScript environment, like a
   cljs.test event, or something being written to stdout. Once there is no
   activity for `:cljs/timeout` seconds, the test fails. This also causes
@@ -112,7 +112,7 @@ producing a final result.
 During these process various "hooks" are invoked (pre-test, post-test, pre-load,
 post-load), which can be implemented by plugins, and test events
 (begin-test-var, pass, fail, summary) are generated, which are handled by a
-reporter to provide realtime progress.
+reporter to provide real-time progress.
 
 Kaocha's built-in features, plugins and reporters are rely on this model of
 execution, so any test type must adhere to it. Note that all of this is on the
@@ -158,7 +158,7 @@ This will also set the `goog.log` root logger, and the
 [glogi](https://github.com/lambdaisland/glogi) for more information about Google
 Closure's logging facilities.
 
-When not using `*debug*` you can still set these log levels seperately through
+When not using `*debug*` you can still set these log levels separately through
 `:closure-defines`.
 
 ``` clojure
