@@ -1,10 +1,7 @@
-
 (ns kaocha.type.version-check
-  
-(:require [kaocha.output :as output]
-          [cljs.util :as util]
-          [slingshot.slingshot :refer [throw+]]))
-
+  (:require [kaocha.output :as output]
+            [cljs.util :as util]
+            [slingshot.slingshot :refer [throw+]]))
 
 (defn meets-minimum-cljs-version
   "Checks whether Clojurescript has at least a minimum version"

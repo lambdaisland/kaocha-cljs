@@ -80,10 +80,8 @@
                              (let [ns-sym (file->ns-name ns-file)]
                                (when (load/ns-match? ns-patterns ns-sym)
                                  (ns-testable ns-sym ns-file))))
-                           test-files)
-        ]
+                           test-files) ]
     (if (version-check/meets-minimum-cljs-version 1 10)
-      
       (assoc testable
              :cljs/compiler-options copts
              :cljs/repl-env repl-env
@@ -97,8 +95,7 @@
                  (fn []
                    (testable/load-testables testables)))))
       (assoc testable :kaocha.testable/load-error 
-             (ex-info "ClojureScript version too low" {:expected ">=1.10"  :got (cljs.util/clojurescript-version) }))
-      )))
+             (ex-info "ClojureScript version too low" {:expected ">=1.10"  :got (cljs.util/clojurescript-version) })))))
 
 (defmethod testable/-load ::ns [testable]
   (let [ns-name (::ns testable)
