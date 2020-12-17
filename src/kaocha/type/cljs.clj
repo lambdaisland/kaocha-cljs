@@ -1,3 +1,4 @@
+(require 'kaocha.type.version-check)
 (ns kaocha.type.cljs
   (:refer-clojure :exclude [symbol])
   (:require [cljs.analyzer :as ana]
@@ -7,6 +8,7 @@
             [cljs.repl :as repl]
             cljs.repl.server
             [cljs.test :as ct]
+            [cljs.util :as util]
             [clojure.java.io :as io]
             [clojure.spec.alpha :as s]
             [clojure.string :as str]
@@ -19,6 +21,7 @@
             [kaocha.result :as result]
             [kaocha.testable :as testable]
             [kaocha.type :as type]
+            [kaocha.type.version-check :as version-check]
             [lambdaisland.tools.namespace.file :as ctn.file]
             [lambdaisland.tools.namespace.find :as ctn.find]
             [lambdaisland.tools.namespace.parse :as ctn.parse]
@@ -77,19 +80,22 @@
                              (let [ns-sym (file->ns-name ns-file)]
                                (when (load/ns-match? ns-patterns ns-sym)
                                  (ns-testable ns-sym ns-file))))
-                           test-files)]
-    (assoc testable
-           :cljs/compiler-options copts
-           :cljs/repl-env repl-env
-           :cljs/timeout timeout
-           :cljs/compiler-env cenv
-           :kaocha.test-plan/tests
-           (env/with-compiler-env cenv
-             (when precompile?
-               (cljs.build.api/build (into #{} cat [source-paths test-paths]) copts))
-             (comp/with-core-cljs {}
-               (fn []
-                 (testable/load-testables testables)))))))
+                           test-files) ]
+    (if (version-check/meets-minimum-cljs-version 1 10)
+      (assoc testable
+             :cljs/compiler-options copts
+             :cljs/repl-env repl-env
+             :cljs/timeout timeout
+             :cljs/compiler-env cenv
+             :kaocha.test-plan/tests
+             (env/with-compiler-env cenv
+               (when precompile?
+                 (cljs.build.api/build (into #{} cat [source-paths test-paths]) copts))
+               (comp/with-core-cljs {}
+                 (fn []
+                   (testable/load-testables testables)))))
+      (assoc testable :kaocha.testable/load-error 
+             (ex-info "ClojureScript version too low" {:expected ">=1.10"  :got (cljs.util/clojurescript-version) })))))
 
 (defmethod testable/-load ::ns [testable]
   (let [ns-name (::ns testable)

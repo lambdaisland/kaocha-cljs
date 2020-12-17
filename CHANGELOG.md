@@ -4,6 +4,8 @@
 
 ## Fixed
 
+* Clearly alert the user that ClojureScript versions before 1.10 aren't supported, rather than failing on whatever 1.10 functionality happens to be invoked first.
+
 ## Changed
 
 # 0.0-71 (2020-02-24 / 773860f)
