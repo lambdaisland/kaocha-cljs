@@ -87,6 +87,9 @@ test paths once.
       background: true
   ```
 
+- You can not pass the `:advanced` optimization setting to the to the clojurescript compiler options, which is very important to run tests against a real build.
+  If this feature is important you should consider using [kaocha-cljs2 instead](https://github.com/lambdaisland/kaocha-cljs2).
+
 ## Architecture
 
 ### Kaocha's execution model
