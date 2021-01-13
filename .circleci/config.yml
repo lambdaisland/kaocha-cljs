@@ -2,7 +2,7 @@ version: 2.1
 
 orbs:
   kaocha: lambdaisland/kaocha@0.0.1
-  clojure: lambdaisland/clojure@0.0.1
+  clojure: lambdaisland/clojure@0.0.2
 
 commands:
   checkout_and_run:
@@ -28,9 +28,12 @@ commands:
           file: target/coverage/integration*/codecov.json
 
 jobs:
+  java-15-clojure-1_10:
+    executor: clojure/openjdk15
+    steps: [{checkout_and_run: {clojure_version: "1.10.2"}}]
   java-11-clojure-1_10:
     executor: clojure/openjdk11
-    steps: [{checkout_and_run: {clojure_version: "1.10.0-RC5"}}]
+    steps: [{checkout_and_run: {clojure_version: "1.10.2"}}]
 
   # java-9-clojure-1_9:
   #   executor: clojure/openjdk9
@@ -47,6 +50,7 @@ jobs:
 workflows:
   kaocha_test:
     jobs:
+      - java-15-clojure-1_10
       - java-11-clojure-1_10
       # - java-9-clojure-1_9
       # - java-8-clojure-1_10
