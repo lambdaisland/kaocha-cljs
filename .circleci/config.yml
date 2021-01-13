@@ -30,10 +30,10 @@ commands:
 jobs:
   java-15-clojure-1_10:
     executor: clojure/openjdk15
-    steps: [{checkout_and_run: {clojure_version: "1.10.2"}}]
+    steps: [{checkout_and_run: {clojure_version: "1.10.1"}}]
   java-11-clojure-1_10:
     executor: clojure/openjdk11
-    steps: [{checkout_and_run: {clojure_version: "1.10.2"}}]
+    steps: [{checkout_and_run: {clojure_version: "1.10.1"}}]
 
   # java-9-clojure-1_9:
   #   executor: clojure/openjdk9
