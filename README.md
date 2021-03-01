@@ -8,7 +8,7 @@ ClojureScript support for Kaocha.
 
 ## Quickstart
 
-- Add kaocha-cljs as a dependency
+- Add kaocha-cljs as a dependency:
 
 ``` clojure
 ;; deps.edn
@@ -18,7 +18,7 @@ ClojureScript support for Kaocha.
 
 Note that you must be using at least Clojure 1.10.
 
-- Configure a ClojureScript test suite
+- Configure a ClojureScript test suite:
 
 ``` clojure
 ;; tests.edn
@@ -32,13 +32,13 @@ Note that you must be using at least Clojure 1.10.
           }]}
 ```
 
-For nodejs, install `ws`.
+For Node.js, install `ws`:
 
 ```
 npm i ws
 ```
 
-Run your tests
+Run your tests:
 
 ```
 clojure -m kaocha.runner unit-cljs
@@ -48,13 +48,13 @@ clojure -m kaocha.runner unit-cljs
 
 - `:kaocha/source-paths` (or `:source-paths` when using `#kaocha/v1`) <br>
   The location of your ClojureScript source paths (vector)
-- `:kaocha/test-paths` (or `:source-paths` when using `#kaocha/v1`) <br>
+- `:kaocha/test-paths` (or `:test-paths` when using `#kaocha/v1`) <br>
   The location of your ClojureScript test paths (vector)
 - `:cljs/timeout` <br> Time in milliseconds before timing out. This timeout gets
   reset whenever we receive an event from the ClojureScript environment, like a
   cljs.test event, or something being written to stdout. Once there is no
   activity for `:cljs/timeout` seconds, the test fails. This also causes
-  subsequent tests are skipped, because we assume the ClojureScript runtime is
+  subsequent tests to be skipped, because we assume the ClojureScript runtime is
   no longer responsive.
 - `:cljs/repl-env` <br> A function (var) name which takes ClojureScript Compiler
   options, and returns a REPL environment. Values you can use include
@@ -94,17 +94,17 @@ test paths once.
 
 ### Kaocha's execution model
 
-Most ClojureScript testing tools work by building a big blob of JavaScript which
+Most ClojureScript testing tools work by building a big blob of JavaScript that
 contains both the compiled tests and a test runner, and then handing that over
 to a JavaScript runtime.
 
-Kaocha however enforces a specific execution model on all its test types.
+Kaocha, however, enforces a specific execution model on all its test types.
 
 ```
 [config] --(load)--> [test-plan] --(run)--> [result]
 ```
 
-Starting from a test configuration (e.g. `tests.edn`) Kaocha will recursively
+Starting from a test configuration (e.g., `tests.edn`) Kaocha will recursively
 `load` the tests, building up a hierarchical test plan. For instance
 `clojure.test` will have a test suite containing test namespaces containing test
 vars.
