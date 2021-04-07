@@ -27,35 +27,33 @@ commands:
           flags: integration
           file: target/coverage/integration*/codecov.json
 
-jobs:
-  java-16-clojure-1_10:
-    executor: clojure/openjdk16
-    steps: [{checkout_and_run: {clojure_version: "1.10.3"}}]
-  java-15-clojure-1_10:
-    executor: clojure/openjdk15
-    steps: [{checkout_and_run: {clojure_version: "1.10.3"}}]
-  java-11-clojure-1_10:
+jobs: 
+  java-11-clojure-1_10: 
     executor: clojure/openjdk11
-    steps: [{checkout_and_run: {clojure_version: "1.10.3"}}]
-
-  # java-9-clojure-1_9:
-  #   executor: clojure/openjdk9
-  #   steps: [{checkout_and_run: {clojure_version: "1.9.0"}}]
-
-   java-8-clojure-1_10:
+    steps: 
+      - 
+        checkout_and_run: 
+          clojure_version: "1.10.3"
+  java-15-clojure-1_10: 
+    executor: clojure/openjdk15
+    steps: 
+      - 
+        checkout_and_run: 
+          clojure_version: "1.10.3"
+  java-8-clojure-1_10: 
     executor: clojure/openjdk8
-    steps: [{checkout_and_run: {clojure_version: "1.10.3"}}]
-
-  # java-8-clojure-1_9:
-  #   executor: clojure/openjdk8
-  #   steps: [{checkout_and_run: {clojure_version: "1.9.0"}}]
-
-workflows:
-  kaocha_test:
-    jobs:
+    steps: 
+      - 
+        checkout_and_run: 
+          clojure_version: "1.10.3"
+orbs: 
+  clojure: lambdaisland/clojure@0.0.4
+  kaocha: lambdaisland/kaocha@0.0.1
+version: 2.1
+workflows: 
+  kaocha_test: 
+    jobs: 
       - java-16-clojure-1_10
       - java-15-clojure-1_10
       - java-11-clojure-1_10
-      # - java-9-clojure-1_9
       - java-8-clojure-1_10
-      # - java-8-clojure-1_9
