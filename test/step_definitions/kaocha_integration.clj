@@ -118,7 +118,10 @@
                         :always
                         (conj "\"$@\""))))
       (write-deps-edn deps-edn)
-      (Files/setPosixFilePermissions runner (PosixFilePermissions/fromString "rwxr--r--"));
+      (doto (io/file runner) ;"rwxr--r--"
+          (.setReadable true true) ; make it readable for everyone
+          (.setWritable true false) ; make it writeable only for the owner
+          (.setExecutable true false))
       (assoc m
              :dir dir
              :test-dir test-dir
