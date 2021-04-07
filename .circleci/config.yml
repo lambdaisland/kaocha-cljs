@@ -1,32 +1,25 @@
-version: 2.1
-
-orbs:
-  kaocha: lambdaisland/kaocha@0.0.1
-  clojure: lambdaisland/clojure@0.0.4
-
-commands:
-  checkout_and_run:
-    parameters:
-      clojure_version:
+--- 
+commands: 
+  checkout_and_run: 
+    parameters: 
+      clojure_version: 
         type: string
-    steps:
+    steps: 
       - checkout
-      - clojure/with_cache:
-          cache_version: << parameters.clojure_version >>
-          steps:
-            - run: clojure -e '(println (System/getProperty "java.runtime.name") (System/getProperty "java.runtime.version") "\nClojure" (clojure-version))'
-            # - kaocha/execute:
-            #     args: "unit --reporter documentation --plugin cloverage --codecov"
-            #     clojure_version: << parameters.clojure_version >>
-            - kaocha/execute:
+      - 
+        clojure/with_cache: 
+          cache_version: "<< parameters.clojure_version >>"
+          steps: 
+            - 
+              run: "clojure -e '(println (System/getProperty \"java.runtime.name\") (System/getProperty \"java.runtime.version\") \"\\nClojure\" (clojure-version))'"
+            - 
+              kaocha/execute: 
                 args: "integration --reporter documentation --plugin cloverage --codecov"
-                clojure_version: << parameters.clojure_version >>
-      # - kaocha/upload_codecov:
-      #     flags: unit
-      - kaocha/upload_codecov:
-          flags: integration
+                clojure_version: "<< parameters.clojure_version >>"
+      - 
+        kaocha/upload_codecov: 
           file: target/coverage/integration*/codecov.json
-
+          flags: integration
 jobs: 
   java-11-clojure-1_10: 
     executor: clojure/openjdk11
