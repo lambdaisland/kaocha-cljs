@@ -4,7 +4,7 @@
   org.clojure/spec.alpha      {:mvn/version "0.2.176"}
   org.clojure/tools.namespace {:mvn/version "0.3.0-alpha4"}
 
-  http-kit                  {:mvn/version "2.3.0"}
+  http-kit/http-kit         {:mvn/version "2.3.0"}
   com.cognitect/transit-clj {:mvn/version "0.8.313"}
   com.cognitect/transit-js  {:mvn/version "0.8.861"}
 
