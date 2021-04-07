@@ -30,21 +30,21 @@ commands:
 jobs:
   java-16-clojure-1_10:
     executor: clojure/openjdk16
-    steps: [{checkout_and_run: {clojure_version: "1.10.1"}}]
+    steps: [{checkout_and_run: {clojure_version: "1.10.3"}}]
   java-15-clojure-1_10:
     executor: clojure/openjdk15
-    steps: [{checkout_and_run: {clojure_version: "1.10.1"}}]
+    steps: [{checkout_and_run: {clojure_version: "1.10.3"}}]
   java-11-clojure-1_10:
     executor: clojure/openjdk11
-    steps: [{checkout_and_run: {clojure_version: "1.10.1"}}]
+    steps: [{checkout_and_run: {clojure_version: "1.10.3"}}]
 
   # java-9-clojure-1_9:
   #   executor: clojure/openjdk9
   #   steps: [{checkout_and_run: {clojure_version: "1.9.0"}}]
 
-  # java-8-clojure-1_10:
-  #   executor: clojure/openjdk8
-  #   steps: [{checkout_and_run: {clojure_version: "1.10.0-RC3"}}]
+  java-8-clojure-1_10:
+    executor: clojure/openjdk8
+    steps: [{checkout_and_run: {clojure_version: "1.10.3"}}]
 
   # java-8-clojure-1_9:
   #   executor: clojure/openjdk8
