@@ -4,11 +4,12 @@
             [clojure.string :as str]
             [clojure.test :refer :all]
             [kaocha.output :as output]
+            [kaocha.cljs.platform :as platform]
             [lambdaisland.cucumber.dsl :refer :all]
             [me.raynes.fs :as fs])
   (:import java.io.File
            [java.nio.file Files OpenOption Path Paths]
-           [java.nio.file.attribute FileAttribute PosixFilePermissions]))
+           [java.nio.file.attribute FileAttribute]))
 
 (require 'kaocha.assertions)
 
@@ -99,7 +100,8 @@
           bin-dir     (join dir "bin")
           config-file (join dir "tests.edn")
           deps-edn    (join dir "deps.edn")
-          runner      (join dir "bin/kaocha")]
+          runner-file (if (platform/on-windows?) "bin/kaocha.ps1" "bin/kaocha")
+          runner      (join dir runner-file)]
       (mkdir test-dir)
       (mkdir bin-dir)
       (spit (str config-file)
@@ -115,7 +117,7 @@
                                "--cov-output" (project-dir-path "target/coverage" (str (gensym "integration")))
                                "--cov-src-ns-path" (project-dir-path "src")
                                "--codecov"])
-                        :always
+                        (platform/on-posix?)
                         (conj "\"$@\""))))
       (write-deps-edn deps-edn)
       (doto (io/file runner) ;"rwxr--r--"
@@ -152,8 +154,11 @@
           (mkdir target)
           (run! #(fs/copy % (io/file (join target (.getName %)))) (fs/glob cache "*"))))
 
-    (let [result (apply shell/sh (conj (shellwords args)
-                                       :dir dir))]
+    (let [result (if (platform/on-windows?) 
+                   (shell/sh "powershell.exe" "-Command" (format "\"&{%s; [Environment]::Exit(1)}" args))
+                   (apply shell/sh (conj (shellwords args)
+                                                                  :dir dir)) 
+                     )  ]
       ;; By default these are hidden unless the test fails
       (when (seq (:out result))
         (println (str dir) "$" args)
