@@ -44,7 +44,7 @@ jobs:
 
    java-8-clojure-1_10:
     executor: clojure/openjdk8
-    steps: [{checkout_and_run: {clojure_version: "1.10.3}}]
+    steps: [{checkout_and_run: {clojure_version: "1.10.3"}}]
 
   # java-8-clojure-1_9:
   #   executor: clojure/openjdk8
