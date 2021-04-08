@@ -111,6 +111,7 @@
       (spit (str runner)
             (str/join " "
                       (cond-> ["clojure"
+                               "\"-J-Dline.separator=`\"`n`\"\""
                                "-m" "kaocha.runner"]
                         (codecov?)
                         (into ["--plugin" "cloverage"
@@ -155,11 +156,12 @@
           (run! #(fs/copy % (io/file (join target (.getName %)))) (fs/glob cache "*"))))
 
     (let [result (if (platform/on-windows?) 
-                   (shell/sh "powershell.exe" "-Command" (format "\"&{%s; [Environment]::Exit(1)}" args))
+                   (shell/sh "powershell.exe"  "-Command" (format "\"&{%s; [Environment]::Exit(1)}" args) :dir dir)
                    (apply shell/sh (conj (shellwords args)
                                                                   :dir dir)) 
                      )  ]
       ;; By default these are hidden unless the test fails
+      ;(println (slurp "bin/kaocha.ps1"))
       (when (seq (:out result))
         (println (str dir) "$" args)
         (println (str (output/colored :underline "stdout") ":\n" (:out result))))
