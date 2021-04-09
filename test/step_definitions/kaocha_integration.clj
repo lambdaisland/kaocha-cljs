@@ -111,7 +111,9 @@
       (spit (str runner)
             (str/join " "
                       (cond-> ["clojure"
+                               (if (platform/on-windows?) 
                                "\"-J-Dline.separator=`\"`n`\"\""
+                                "-J-Dline.separator=$'\n'")
                                "-m" "kaocha.runner"]
                         (codecov?)
                         (into ["--plugin" "cloverage"
