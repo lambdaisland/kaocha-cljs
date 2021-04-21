@@ -17,6 +17,8 @@
 (glogi/set-level (str *ns*) (keyword (str/lower-case kaocha.type.cljs/log-level)))
 
 (def socket nil)
+(def current-test-file nil)
+(def current-test-line nil)
 
 (defn record-handler [type]
   (transit/write-handler (constantly type)
@@ -98,9 +100,20 @@
       (str humane-print/*sb*))))
 
 (defn cljs-test-msg [m]
-  {:type :cljs.test/message
-   :cljs.test/message m
-   :cljs.test/testing-contexts (:testing-contexts (t/get-current-env))})
+  ;; This is terrible all around, but ClojureScript's logic for detecting
+  ;; file/line in case of exceptions outside of (is (..)) macros is even worse,
+  ;; so if it looks like ClojureScript messed up, then we try to mess up less,
+  ;; which works fairly well in practice. The main downside is that you get the
+  ;; line number of the deftest, not the line number where the exception
+  ;; happened.
+  (let [m (cond-> m
+            (and (or (not (string? (:file m)))
+                     (not (str/ends-with? (:file m) "js")))
+                 current-test-file)
+            (assoc :file current-test-file :line current-test-line))]
+    {:type :cljs.test/message
+     :cljs.test/message m
+     :cljs.test/testing-contexts (:testing-contexts (t/get-current-env))}))
 
 (defmethod t/report [:kaocha.type/cljs ::propagate] [m]
   (send! (cljs-test-msg m)))

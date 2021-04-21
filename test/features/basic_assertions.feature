@@ -45,7 +45,7 @@ Feature: Basic assertions
     And I run `bin/kaocha`
     Then the output should contain:
       """
-      FAIL in cljs:my.sample-test/regular-fail (cljs/test.js:433)
+      FAIL in cljs:my.sample-test/regular-fail (test/my/sample_test.cljs:8)
       Expected:
         :foo
       Actual:
@@ -56,13 +56,13 @@ Feature: Basic assertions
       """
     And the output should contain:
       """
-      ERROR in cljs:my.sample-test/exception-outside-is (Error:NaN)
+      ERROR in cljs:my.sample-test/exception-outside-is (test/my/sample_test.cljs:13)
       Uncaught exception, not in assertion.
       Error: Whoopsie!
       """
     And the output should contain:
       """
-      ERROR in cljs:my.sample-test/exception-in-is (Error:NaN)
+      ERROR in cljs:my.sample-test/exception-in-is (test/my/sample_test.cljs:11)
       Whoopsie!
       Error: Whoopsie!
       """

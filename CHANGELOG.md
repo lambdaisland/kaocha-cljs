@@ -1,10 +1,12 @@
 # Unreleased
 
-## Added
-
 ## Fixed
 
-* Clearly alert the user that ClojureScript versions before 1.10 aren't supported, rather than failing on whatever 1.10 functionality happens to be invoked first.
+- Clearly alert the user that ClojureScript versions before 1.10 aren't
+  supported, rather than failing on whatever 1.10 functionality happens to be
+  invoked first.
+- Show the file/line of the deftest in case cljs.test is not able to provide a
+  reasonable file/line number.
 
 ## Changed
 

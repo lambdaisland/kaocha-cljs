@@ -46,11 +46,14 @@
    ::ns ns-sym
    ::file ns-file})
 
+(defn file-relative [file]
+  (str/replace file (str (.getCanonicalPath (io/file ".")) "/") ""))
+
 (defn test-testable [test-name meta]
   {::testable/type ::test
    ::testable/id (keyword (str "cljs:" test-name))
    ::testable/desc (name test-name)
-   ::testable/meta meta
+   ::testable/meta (update meta :file file-relative)
    ::test test-name})
 
 (defn find-cljs-sources-in-dirs [paths]
@@ -94,7 +97,7 @@
                (comp/with-core-cljs {}
                  (fn []
                    (testable/load-testables testables)))))
-      (assoc testable :kaocha.testable/load-error 
+      (assoc testable :kaocha.testable/load-error
              (ex-info "ClojureScript version too low" {:expected ">=1.10"  :got (cljs.util/clojurescript-version) })))))
 
 (defmethod testable/-load ::ns [testable]
@@ -129,7 +132,7 @@
    :cljs.test/message
    (fn [msg state]
      (binding [t/*testing-contexts* (:cljs.test/testing-contexts msg)]
-       (t/do-report (:cljs.test/message msg)))
+       (t/do-report (update (:cljs.test/message msg) :file file-relative)))
      state)
 
    :cljs/out
@@ -205,9 +208,6 @@
 (defn- kill! [^Process proc]
   (when (alive? proc)
     (.destroyForcibly proc)))
-
-(defn file-relative [file]
-  (str/replace file (str (.getCanonicalPath (io/file ".")) "/") ""))
 
 (defmacro try-all
   "Run all forms, even if a previous form throws an error. Good for cleanup. If
@@ -389,10 +389,12 @@
              {::testable/skip-remaining? true
               ::timeout? true}))))
 
-(defn run-test [{::keys [test eval queue timeout]}]
-  (let [done (keyword (gensym (str test "-done")))]
+(defn run-test [{::keys [test eval queue timeout]
+                 testable-meta ::testable/meta}]
+  (let [{:keys [file line]} testable-meta
+        done (keyword (gensym (str test "-done")))]
     (eval `(do
-             (kaocha.cljs.run/run-test  ~test)
+             (kaocha.cljs.run/run-test ~test ~file ~line)
              ~done))
 
     (queue-consumer
@@ -420,7 +422,7 @@
         (when (= pass error fail pending 0)
           (binding [testable/*fail-fast?* false]
             (t/do-report {:type :kaocha.type.var/zero-assertions
-                          :file (file-relative (:file (::testable/meta testable)))
+                          :file (:file (::testable/meta testable))
                           :line (:line (::testable/meta testable))})))
         (merge testable
                {:kaocha.result/count 1}
@@ -456,7 +458,7 @@
 (defmethod report/dots* ::timeout [m]
   (t/with-test-out
     (print (output/colored :red "T"))
-    (flush)) )
+    (flush)))
 
 (comment
   (require 'kaocha.repl)

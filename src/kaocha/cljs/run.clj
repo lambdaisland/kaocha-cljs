@@ -29,9 +29,12 @@
           `(t/update-current-env! [:each-fixtures] assoc '~ns
                                   ~(symbol (name ns) "cljs-test-each-fixtures"))))))
 
-(defmacro run-test [test-sym]
-  `(t/run-block
-    (concat
-     [(load-each-fixtures ~(symbol (namespace test-sym)))]
-     (t/test-vars-block [(var ~test-sym)])
-     [#(kaocha.cljs.websocket-client/send! {:type ::test-finished :test '~test-sym})])))
+(defmacro run-test [test-sym file line]
+  `(do
+     (set! kaocha.cljs.websocket-client/current-test-file ~file)
+     (set! kaocha.cljs.websocket-client/current-test-line ~line)
+     (t/run-block
+      (concat
+       [(load-each-fixtures ~(symbol (namespace test-sym)))]
+       (t/test-vars-block [(var ~test-sym)])
+       [#(kaocha.cljs.websocket-client/send! {:type ::test-finished :test '~test-sym})]))))
