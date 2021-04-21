@@ -1,24 +1,62 @@
 # kaocha-cljs
 
 <!-- badges -->
-[![CircleCI](https://circleci.com/gh/lambdaisland/kaocha-cljs.svg?style=svg)](https://circleci.com/gh/lambdaisland/kaocha-cljs) [![cljdoc badge](https://cljdoc.org/badge/lambdaisland/kaocha-cljs)](https://cljdoc.org/d/lambdaisland/kaocha-cljs) [![Clojars Project](https://img.shields.io/clojars/v/lambdaisland/kaocha-cljs.svg)](https://clojars.org/lambdaisland/kaocha-cljs) [![codecov](https://codecov.io/gh/lambdaisland/kaocha-cljs/branch/master/graph/badge.svg)](https://codecov.io/gh/lambdaisland/kaocha-cljs)
+[![CircleCI](https://circleci.com/gh/com.lambdaisland/kaocha-cljs.svg?style=svg)](https://circleci.com/gh/com.lambdaisland/kaocha-cljs) [![cljdoc badge](https://cljdoc.org/badge/com.lambdaisland/kaocha-cljs)](https://cljdoc.org/d/com.lambdaisland/kaocha-cljs) [![Clojars Project](https://img.shields.io/clojars/v/com.lambdaisland/kaocha-cljs.svg)](https://clojars.org/com.lambdaisland/kaocha-cljs)
 <!-- /badges -->
 
-ClojureScript support for Kaocha.
+ClojureScript support for Kaocha
 
-## Quickstart
+## Features
 
-- Add kaocha-cljs as a dependency:
+Kaocha-cljs provides basic ClojureScript support for the Kaocha test runner. It
+can run tests in the browser or in Node.js. It does this under the hood using
+the built-in ClojureScripr REPL implementations for the browser or for node.
 
-``` clojure
-;; deps.edn
-{:deps {lambdaisland/kaocha {...}
-        lambdaisland/kaocha-cljs {:mvn/version "0.0-71"}}}
+This approach makes it fairly easy to set up, but also fairly limited and
+inflexible.
+
+- Your code has to be compatible with vanilla ClojureScript
+- Shadow-cljs is not supported
+- We can only run tests with `:optimizations :none`
+- You have little to no control over the compiler settings
+- We don't support other runtimes besides Node and browser
+- Each run opens a new tab/process, we can't reconnect to existing JS runtimes
+
+To get around these limitations we created
+[kaocha-cljs2](https://github.com/lambdaisland/kaocha-cljs2), which is
+infinitely flexible, but significantly harder to set up. For simple projects and
+libraries kaocha-cljs v1 can still be a valid choice. If it no longer serves
+your needs, you can try your hand at kaocha-cljs2.
+
+Kaocha-cljs require Clojure and ClojureScript 1.10 or later.
+
+<!-- installation -->
+## Installation
+
+To use the latest release, add the following to your `deps.edn` ([Clojure CLI](https://clojure.org/guides/deps_and_cli))
+
+```
+com.lambdaisland/kaocha-cljs {:mvn/version "0.0-71"}
 ```
 
-Note that you must be using at least Clojure 1.10.
+or add the following to your `project.clj` ([Leiningen](https://leiningen.org/))
 
-- Configure a ClojureScript test suite:
+```
+[com.lambdaisland/kaocha-cljs "0.0-71"]
+```
+<!-- /installation -->
+
+For Node.js support also install the `ws` npm package, you can add something
+like this to `bin/kaocha` to this for you.
+
+```sh
+#!/usr/bin/env sh
+
+[ -d "node_modules/ws" ] || npm install ws
+clojure -A:dev:test -M -m kaocha.runner "$@"
+```
+
+To configure your kaocha-cljs test suite:
 
 ``` clojure
 ;; tests.edn
@@ -32,16 +70,10 @@ Note that you must be using at least Clojure 1.10.
           }]}
 ```
 
-For Node.js, install `ws`:
+And run your tests
 
 ```
-npm i ws
-```
-
-Run your tests:
-
-```
-clojure -m kaocha.runner unit-cljs
+bin/kaocha unit-cljs
 ```
 
 ## Configuration
@@ -173,10 +205,62 @@ When not using `*debug*` you can still set these log levels separately through
 ;; OFF SHOUT SEVERE WARNING INFO CONFIG FINE FINER FINEST ALL
 ```
 
-<!-- license-epl -->
+<!-- opencollective -->
+## Lambda Island Open Source
+
+<img align="left" src="https://github.com/lambdaisland/open-source/raw/master/artwork/lighthouse_readme.png">
+
+&nbsp;
+
+kaocha-cljs is part of a growing collection of quality Clojure libraries created and maintained
+by the fine folks at [Gaiwan](https://gaiwan.co).
+
+Pay it forward by [becoming a backer on our Open Collective](http://opencollective.com/lambda-island),
+so that we may continue to enjoy a thriving Clojure ecosystem.
+
+You can find an overview of our projects at [lambdaisland/open-source](https://github.com/lambdaisland/open-source).
+
+&nbsp;
+
+&nbsp;
+<!-- /opencollective -->
+
+<!-- contributing -->
+## Contributing
+
+Everyone has a right to submit patches to kaocha-cljs, and thus become a contributor.
+
+Contributors MUST
+
+- adhere to the [LambdaIsland Clojure Style Guide](https://nextjournal.com/lambdaisland/clojure-style-guide)
+- write patches that solve a problem. Start by stating the problem, then supply a minimal solution. `*`
+- agree to license their contributions as MPL 2.0.
+- not break the contract with downstream consumers. `**`
+- not break the tests.
+
+Contributors SHOULD
+
+- update the CHANGELOG and README.
+- add tests for new functionality.
+
+If you submit a pull request that adheres to these rules, then it will almost
+certainly be merged immediately. However some things may require more
+consideration. If you add new dependencies, or significantly increase the API
+surface, then we need to decide if these changes are in line with the project's
+goals. In this case you can start by [writing a pitch](https://nextjournal.com/lambdaisland/pitch-template),
+and collecting feedback on it.
+
+`*` This goes for features too, a feature needs to solve a problem. State the problem it solves, then supply a minimal solution.
+
+`**` As long as this project has not seen a public release (i.e. is not on Clojars)
+we may still consider making breaking changes, if there is consensus that the
+changes are justified.
+<!-- /contributing -->
+
+<!-- license -->
 ## License
 
-Copyright &copy; 2019 Arne Brasseur
+Copyright &copy; 2018-2021 Arne Brasseur and Contributors
 
-Available under the terms of the Eclipse Public License 1.0, see LICENSE.txt
-<!-- /license-epl -->
+Licensed under the term of the Mozilla Public License 2.0, see LICENSE.
+<!-- /license -->

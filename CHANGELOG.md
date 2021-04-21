@@ -9,6 +9,8 @@
 ## Changed
 
 - Bump com.lambdaisland/glogi to 1.0.112
+- Release under com.lambdaisland/kaocha-cljs in line with Clojars policy
+- Bump all dependencies
 
 # 0.0-71 (2020-02-24 / 773860f)
 

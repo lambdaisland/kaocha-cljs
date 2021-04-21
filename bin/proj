@@ -1,0 +1,13 @@
+#!bin/bb
+
+(ns proj (:require [lioss.main :as lioss]))
+
+(lioss/main
+ {:license        :mpl
+  :inception-year 2018
+  :description    "ClojureScript support for Kaocha"})
+
+
+;; Local Variables:
+;; mode:clojure
+;; End:
