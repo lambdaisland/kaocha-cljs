@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemalocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>lambdaisland</groupId>
+  <groupId>com.lambdaisland</groupId>
   <artifactId>kaocha-cljs</artifactId>
-  <version>0.0-71</version>
+  <version>1.0.93</version>
   <name>kaocha-cljs</name>
-  <description>ClojureScript support for the Kaocha test runner.</description>
+  <description>ClojureScript support for Kaocha</description>
   <url>https://github.com/lambdaisland/kaocha-cljs</url>
   <inceptionYear>2018</inceptionYear>
   <organization>
@@ -14,31 +14,36 @@
   </organization>
   <licenses>
     <license>
-      <name>Eclipse Public License 1.0</name>
-      <url>https://www.eclipse.org/legal/epl-v10.html</url>
+      <name>MPL-2.0</name>
+      <url>https://www.mozilla.org/media/MPL/2.0/index.txt</url>
     </license>
   </licenses>
   <scm>
     <url>https://github.com/lambdaisland/kaocha-cljs</url>
     <connection>scm:git:git://github.com/lambdaisland/kaocha-cljs.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/lambdaisland/kaocha-cljs.git</developerConnection>
-    <tag>6ec10789bc6499b143fb20f3d46bb6e67cdc62cd</tag>
+    <tag>ed8f55b4dac7e41458e5945a42a2c74bc641f340</tag>
   </scm>
   <dependencies>
     <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>clojure</artifactId>
-      <version>1.10.0</version>
+      <version>1.10.3</version>
     </dependency>
     <dependency>
       <groupId>lambdaisland</groupId>
       <artifactId>kaocha</artifactId>
-      <version>0.0-541</version>
+      <version>1.0.829</version>
     </dependency>
     <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>spec.alpha</artifactId>
-      <version>0.2.176</version>
+      <version>0.2.194</version>
+    </dependency>
+    <dependency>
+      <groupId>com.lambdaisland</groupId>
+      <artifactId>glogi</artifactId>
+      <version>1.0.112</version>
     </dependency>
     <dependency>
       <groupId>net.ladenthin</groupId>
@@ -48,37 +53,32 @@
     <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>clojurescript</artifactId>
-      <version>1.10.520</version>
+      <version>1.10.844</version>
     </dependency>
     <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>tools.namespace</artifactId>
-      <version>0.3.0-alpha4</version>
+      <version>1.1.0</version>
     </dependency>
     <dependency>
       <groupId>com.cognitect</groupId>
       <artifactId>transit-js</artifactId>
-      <version>0.8.861</version>
+      <version>0.8.867</version>
     </dependency>
     <dependency>
       <groupId>pjstadig</groupId>
       <artifactId>humane-test-output</artifactId>
-      <version>0.9.0</version>
+      <version>0.11.0</version>
     </dependency>
     <dependency>
       <groupId>com.cognitect</groupId>
       <artifactId>transit-clj</artifactId>
-      <version>0.8.313</version>
-    </dependency>
-    <dependency>
-      <groupId>lambdaisland</groupId>
-      <artifactId>glogi</artifactId>
-      <version>0.0-25</version>
+      <version>1.0.324</version>
     </dependency>
     <dependency>
       <groupId>http-kit</groupId>
       <artifactId>http-kit</artifactId>
-      <version>2.3.0</version>
+      <version>2.5.3</version>
     </dependency>
   </dependencies>
   <build>
@@ -87,22 +87,44 @@
       <resource>
         <directory>src</directory>
       </resource>
-      <!-- <resource>
-                 <directory>resources</directory>
-                 </resource> -->
+      <resource>
+        <directory>resources</directory>
+      </resource>
+      <resource>
+        <directory>test/cljs</directory>
+      </resource>
     </resources>
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.8.1</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>2.4</version>
+        <version>3.2.0</version>
         <configuration>
           <archive>
             <manifestEntries>
-              <Git-Revision>6ec10789bc6499b143fb20f3d46bb6e67cdc62cd</Git-Revision>
+              <git-revision>ed8f55b4dac7e41458e5945a42a2c74bc641f340</git-revision>
             </manifestEntries>
           </archive>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-gpg-plugin</artifactId>
+        <version>1.6</version>
+        <executions>
+          <execution>
+            <id>sign-artifacts</id>
+            <phase>verify</phase>
+            <goals>
+              <goal>sign</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>
