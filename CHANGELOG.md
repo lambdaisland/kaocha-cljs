@@ -8,6 +8,8 @@
 
 ## Changed
 
+- Bump com.lambdaisland/glogi to 1.0.112
+
 # 0.0-71 (2020-02-24 / 773860f)
 
 ## Fixed
