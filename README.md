@@ -21,6 +21,7 @@ inflexible.
 - You have little to no control over the compiler settings
 - We don't support other runtimes besides Node and browser
 - Each run opens a new tab/process, we can't reconnect to existing JS runtimes
+- The `repl-env` abstraction is a black box which provide very little diagnostics
 
 To get around these limitations we created
 [kaocha-cljs2](https://github.com/lambdaisland/kaocha-cljs2), which is
@@ -121,6 +122,22 @@ test paths once.
 
 - You can not pass the `:advanced` optimization setting to the to the clojurescript compiler options, which is very important to run tests against a real build.
   If this feature is important you should consider using [kaocha-cljs2 instead](https://github.com/lambdaisland/kaocha-cljs2).
+
+### Common Errors
+
+- `"Kaocha ClojureScript client failed connecting back."`
+
+This is the most common problem you'll encounter. Unfortunately it's a symptom
+that can have many underlying causes. What it means is this: Kaocha-cljs has
+created a ClojureScript repl-env, and asked it to evaluate the code which loads
+our websocket client. At this point Kaocha has to wait until that client is
+loaded, and has connected back to Kaocha, so we know we're in business.
+
+For some reason this didn't happen in time, and so we time out and provide this
+error. What this really means is that the `repl-env` misbehaved. Maybe the JS
+runtime didn't start up properly (check your node process for instance), maybe
+the compiles CLJS caused an error (anything in the browser console)? Maybe it's
+a networking issue... We handed over control, and never got it back.
 
 ## Architecture
 
