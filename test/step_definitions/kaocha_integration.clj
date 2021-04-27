@@ -4,11 +4,12 @@
             [clojure.string :as str]
             [clojure.test :refer :all]
             [kaocha.output :as output]
+            [kaocha.cljs.platform :as platform]
             [lambdaisland.cucumber.dsl :refer :all]
             [me.raynes.fs :as fs])
   (:import java.io.File
            [java.nio.file Files OpenOption Path Paths]
-           [java.nio.file.attribute FileAttribute PosixFilePermissions]))
+           [java.nio.file.attribute FileAttribute]))
 
 (require 'kaocha.assertions)
 
@@ -99,7 +100,8 @@
           bin-dir     (join dir "bin")
           config-file (join dir "tests.edn")
           deps-edn    (join dir "deps.edn")
-          runner      (join dir "bin/kaocha")]
+          runner-file (if (platform/on-windows?) "bin/kaocha.ps1" "bin/kaocha")
+          runner      (join dir runner-file)]
       (mkdir test-dir)
       (mkdir bin-dir)
       (spit (str config-file)
@@ -109,16 +111,22 @@
       (spit (str runner)
             (str/join " "
                       (cond-> ["clojure"
+                               (if (platform/on-windows?) 
+                               "\"-J-Dline.separator=`\"`n`\"\""
+                                "-J-Dline.separator=$'\n'")
                                "-m" "kaocha.runner"]
                         (codecov?)
                         (into ["--plugin" "cloverage"
                                "--cov-output" (project-dir-path "target/coverage" (str (gensym "integration")))
                                "--cov-src-ns-path" (project-dir-path "src")
                                "--codecov"])
-                        :always
+                        (platform/on-posix?)
                         (conj "\"$@\""))))
       (write-deps-edn deps-edn)
-      (Files/setPosixFilePermissions runner (PosixFilePermissions/fromString "rwxr--r--"));
+      (doto (io/file runner) ;"rwxr--r--"
+          (.setReadable true true) ; make it readable for everyone
+          (.setWritable true false) ; make it writeable only for the owner
+          (.setExecutable true false))
       (assoc m
              :dir dir
              :test-dir test-dir
@@ -149,9 +157,13 @@
           (mkdir target)
           (run! #(fs/copy % (io/file (join target (.getName %)))) (fs/glob cache "*"))))
 
-    (let [result (apply shell/sh (conj (shellwords args)
-                                       :dir dir))]
+    (let [result (if (platform/on-windows?) 
+                   (shell/sh "powershell.exe"  "-Command" (format "\"&{%s; [Environment]::Exit(1)}" args) :dir dir)
+                   (apply shell/sh (conj (shellwords args)
+                                                                  :dir dir)) 
+                     )  ]
       ;; By default these are hidden unless the test fails
+      ;(println (slurp "bin/kaocha.ps1"))
       (when (seq (:out result))
         (println (str dir) "$" args)
         (println (str (output/colored :underline "stdout") ":\n" (:out result))))
