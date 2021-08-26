@@ -37,7 +37,7 @@ Kaocha-cljs require Clojure and ClojureScript 1.10 or later.
 To use the latest release, add the following to your `deps.edn` ([Clojure CLI](https://clojure.org/guides/deps_and_cli))
 
 ```
-com.lambdaisland/kaocha-cljs {:mvn/version "1.0.103"}
+com.lambdaisland/kaocha-cljs {:mvn/version "1.0.107"}
 ```
 
 or add the following to your `project.clj` ([Leiningen](https://leiningen.org/))
