@@ -5,7 +5,8 @@
 (lioss/main
  {:license        :mpl
   :inception-year 2018
-  :description    "ClojureScript support for Kaocha"})
+  :description    "ClojureScript support for Kaocha"
+  :group-id       "lambdaisland"})
 
 
 ;; Local Variables:
