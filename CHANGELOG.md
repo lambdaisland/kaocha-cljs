@@ -1,10 +1,8 @@
 # Unreleased
 
-## Added
-
-## Fixed
-
 ## Changed
+
+- Bump ClojureScript, Glogi, Transit, Matcher-combinators
 
 # 1.0.93 (2021-04-21 / b6a7aa1)
 
