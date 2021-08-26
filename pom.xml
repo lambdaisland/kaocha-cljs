@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemalocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.lambdaisland</groupId>
+  <groupId>lambdaisland</groupId>
   <artifactId>kaocha-cljs</artifactId>
-  <version>1.0.103</version>
+  <version>1.0.107</version>
   <name>kaocha-cljs</name>
   <description>ClojureScript support for Kaocha</description>
   <url>https://github.com/lambdaisland/kaocha-cljs</url>
@@ -22,7 +22,7 @@
     <url>https://github.com/lambdaisland/kaocha-cljs</url>
     <connection>scm:git:git://github.com/lambdaisland/kaocha-cljs.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/lambdaisland/kaocha-cljs.git</developerConnection>
-    <tag>5ba1d665384dc4ef9b03ca29dc6ca049f8aee8d5</tag>
+    <tag>6e8b6c8714b47db0ca35c7eb6fa999b452b56015</tag>
   </scm>
   <dependencies>
     <dependency>
@@ -107,7 +107,7 @@
         <configuration>
           <archive>
             <manifestEntries>
-              <git-revision>5ba1d665384dc4ef9b03ca29dc6ca049f8aee8d5</git-revision>
+              <git-revision>6e8b6c8714b47db0ca35c7eb6fa999b452b56015</git-revision>
             </manifestEntries>
           </archive>
         </configuration>
