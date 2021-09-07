@@ -1,7 +1,7 @@
 # kaocha-cljs
 
 <!-- badges -->
-[![CircleCI](https://circleci.com/gh/com.lambdaisland/kaocha-cljs.svg?style=svg)](https://circleci.com/gh/com.lambdaisland/kaocha-cljs) [![cljdoc badge](https://cljdoc.org/badge/com.lambdaisland/kaocha-cljs)](https://cljdoc.org/d/com.lambdaisland/kaocha-cljs) [![Clojars Project](https://img.shields.io/clojars/v/com.lambdaisland/kaocha-cljs.svg)](https://clojars.org/com.lambdaisland/kaocha-cljs)
+[![CircleCI](https://circleci.com/gh/com.lambdaisland/kaocha-cljs.svg?style=svg)](https://circleci.com/gh/com.lambdaisland/kaocha-cljs) [![cljdoc badge](https://cljdoc.org/badge/com.lambdaisland/kaocha-cljs)](https://cljdoc.org/d/com.lambdaisland/kaocha-cljs) [![Clojars Project](https://img.shields.io/clojars/v/lambdaisland/kaocha-cljs.svg)](https://clojars.org/lambdaisland/kaocha-cljs)
 <!-- /badges -->
 
 ClojureScript support for Kaocha
@@ -37,13 +37,13 @@ Kaocha-cljs require Clojure and ClojureScript 1.10 or later.
 To use the latest release, add the following to your `deps.edn` ([Clojure CLI](https://clojure.org/guides/deps_and_cli))
 
 ```
-com.lambdaisland/kaocha-cljs {:mvn/version "1.0.107"}
+lambdaisland/kaocha-cljs {:mvn/version "1.0.107"}
 ```
 
 or add the following to your `project.clj` ([Leiningen](https://leiningen.org/))
 
 ```
-[com.lambdaisland/kaocha-cljs "1.0.103"]
+[lambdaisland/kaocha-cljs "1.0.107"]
 ```
 <!-- /installation -->
 
