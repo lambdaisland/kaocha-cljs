@@ -1,4 +1,4 @@
-#!bin/bb
+#!/usr/bin/env bb
 
 (ns proj (:require [lioss.main :as lioss]))
 
@@ -6,7 +6,7 @@
  {:license        :mpl
   :inception-year 2018
   :description    "ClojureScript support for Kaocha"
-  :group-id       "lambdaisland"})
+  :group-id       "com.lambdaisland"})
 
 
 ;; Local Variables:
