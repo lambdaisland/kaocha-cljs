@@ -1,16 +1,10 @@
 # Unreleased
 
-## Added
-
-## Fixed
-
-## Changed
-
-# 1.0.107 (2021-08-26 / e19afab)
-
 ## Changed
 
 - Bump ClojureScript, Glogi, Transit, Matcher-combinators
+- This version was accidentally released under the `lambdaisland` group ad
+  1.0.107. The canonical version going forward is under `com.lambdaisland`.
 
 # 1.0.93 (2021-04-21 / b6a7aa1)
 
