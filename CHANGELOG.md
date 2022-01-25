@@ -1,10 +1,9 @@
 # Unreleased
 
-## Added
-
-## Fixed
-
 ## Changed
+
+- General version bumps, so we don't pull in old versions of ClojureScript or
+  Glögi.
 
 # 1.0.113 (2021-09-07 / 2680b20)
 
