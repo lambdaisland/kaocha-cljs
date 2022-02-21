@@ -13,11 +13,11 @@
             [goog.json :as gjson]
             [goog.html.legacyconversions :as conv]
             [goog.userAgent.product :as product])
-  (:import [goog.net WebSocket]
-           [goog.debug Console]
-           [goog.Uri QueryData]
-           [goog Promise]
-           [goog.storage.mechanism HTML5SessionStorage]))
+  (:import (goog.net WebSocket)
+           (goog.debug Console)
+           (goog.Uri QueryData)
+           (goog Promise)
+           (goog.storage.mechanism HTML5SessionStorage)))
 
 (def host-env
   (cond

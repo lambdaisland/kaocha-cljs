@@ -5,12 +5,12 @@
   org.clojure/tools.namespace {:mvn/version "1.2.0"}
 
   http-kit/http-kit         {:mvn/version "2.5.3"}
-  com.cognitect/transit-clj {:mvn/version "1.0.324"}
+  com.cognitect/transit-clj {:mvn/version "1.0.329"}
   com.cognitect/transit-js  {:mvn/version "0.8.874"}
 
   pjstadig/humane-test-output {:mvn/version "0.11.0"}
 
-  lambdaisland/kaocha        {:mvn/version "1.60.977"}
+  lambdaisland/kaocha        {:mvn/version "1.63.998"}
   com.lambdaisland/glogi     {:mvn/version "1.1.144"}
   net.ladenthin/streambuffer {:mvn/version "1.1.0"}}
 
