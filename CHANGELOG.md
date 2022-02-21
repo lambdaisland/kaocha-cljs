@@ -1,4 +1,4 @@
-# Unreleased
+# 1.1.118 (2022-02-21 / 63a9ef4)
 
 ## Changed
 
