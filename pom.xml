@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.lambdaisland</groupId>
   <artifactId>kaocha-cljs</artifactId>
-  <version>1.0.113</version>
+  <version>1.1.118</version>
   <name>kaocha-cljs</name>
   <description>ClojureScript support for Kaocha</description>
   <url>https://github.com/lambdaisland/kaocha-cljs</url>
@@ -12,6 +12,9 @@
     <name>Lambda Island</name>
     <url>https://lambdaisland.com</url>
   </organization>
+  <properties>
+    <project class="build sourceEncoding">UTF-8</project>
+  </properties>
   <licenses>
     <license>
       <name>MPL-2.0</name>
@@ -22,7 +25,7 @@
     <url>https://github.com/lambdaisland/kaocha-cljs</url>
     <connection>scm:git:git://github.com/lambdaisland/kaocha-cljs.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/lambdaisland/kaocha-cljs.git</developerConnection>
-    <tag>c2f401079370e515e8a73af3a79b92b04a33e0c3</tag>
+    <tag>55cd258435ddc24ed47f28252c7bd759d80d8784</tag>
   </scm>
   <dependencies>
     <dependency>
@@ -33,17 +36,17 @@
     <dependency>
       <groupId>lambdaisland</groupId>
       <artifactId>kaocha</artifactId>
-      <version>1.0.887</version>
+      <version>1.63.998</version>
     </dependency>
     <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>spec.alpha</artifactId>
-      <version>0.2.194</version>
+      <version>0.3.218</version>
     </dependency>
     <dependency>
       <groupId>com.lambdaisland</groupId>
       <artifactId>glogi</artifactId>
-      <version>1.0.128</version>
+      <version>1.1.144</version>
     </dependency>
     <dependency>
       <groupId>net.ladenthin</groupId>
@@ -53,12 +56,12 @@
     <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>clojurescript</artifactId>
-      <version>1.10.879</version>
+      <version>1.11.4</version>
     </dependency>
     <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>tools.namespace</artifactId>
-      <version>1.1.0</version>
+      <version>1.2.0</version>
     </dependency>
     <dependency>
       <groupId>com.cognitect</groupId>
@@ -73,7 +76,7 @@
     <dependency>
       <groupId>com.cognitect</groupId>
       <artifactId>transit-clj</artifactId>
-      <version>1.0.324</version>
+      <version>1.0.329</version>
     </dependency>
     <dependency>
       <groupId>http-kit</groupId>
@@ -99,6 +102,10 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.8.1</version>
+        <configuration>
+          <source>1.8</source>
+          <target>1.8</target>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -107,7 +114,7 @@
         <configuration>
           <archive>
             <manifestEntries>
-              <git-revision>c2f401079370e515e8a73af3a79b92b04a33e0c3</git-revision>
+              <git-revision>55cd258435ddc24ed47f28252c7bd759d80d8784</git-revision>
             </manifestEntries>
           </archive>
         </configuration>
