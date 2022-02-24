@@ -76,8 +76,7 @@
 
 (defn pretty-print-failure [m]
   (let [buffer (StringBuffer.)]
-    (binding [humane-print/*sb* buffer
-              *out*             (pp/get-pretty-writer (StringBufferWriter. buffer))]
+    (binding [*out* (pp/get-pretty-writer (StringBufferWriter. buffer))]
       (let [{:keys [type expected actual diffs message] :as event}
             (humane-print/convert-event m)
             print-expected (fn [actual]
@@ -97,7 +96,7 @@
             (when b
               (pp/pprint b *out*)))
           (print-expected actual)))
-      (str humane-print/*sb*))))
+      (str buffer))))
 
 (defn cljs-test-msg [m]
   ;; This is terrible all around, but ClojureScript's logic for detecting
