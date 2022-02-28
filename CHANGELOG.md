@@ -1,10 +1,8 @@
 # Unreleased
 
-## Added
-
 ## Fixed
 
-## Changed
+- Get rid of warnings from humane-test-ouput
 
 # 1.1.118 (2022-02-21 / 63a9ef4)
 
