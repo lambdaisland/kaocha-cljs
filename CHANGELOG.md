@@ -1,3 +1,11 @@
+# Unreleased
+
+## Added
+
+## Fixed
+
+## Changed
+
 # 1.2.123 (2022-02-28 / 019e6ef)
 
 ## Fixed
