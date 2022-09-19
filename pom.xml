@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.lambdaisland</groupId>
   <artifactId>kaocha-cljs</artifactId>
-  <version>1.2.123</version>
+  <version>1.3.127</version>
   <name>kaocha-cljs</name>
   <description>ClojureScript support for Kaocha</description>
   <url>https://github.com/lambdaisland/kaocha-cljs</url>
@@ -25,18 +25,18 @@
     <url>https://github.com/lambdaisland/kaocha-cljs</url>
     <connection>scm:git:git://github.com/lambdaisland/kaocha-cljs.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/lambdaisland/kaocha-cljs.git</developerConnection>
-    <tag>a4e7596e7e32581ec4f9ae269c5a009dde7a666a</tag>
+    <tag>eda78d7a1354e7482d95f1d9c1d0f3489ccd16f7</tag>
   </scm>
   <dependencies>
     <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>clojure</artifactId>
-      <version>1.10.3</version>
+      <version>1.11.1</version>
     </dependency>
     <dependency>
       <groupId>lambdaisland</groupId>
       <artifactId>kaocha</artifactId>
-      <version>1.63.998</version>
+      <version>1.70.1086</version>
     </dependency>
     <dependency>
       <groupId>org.clojure</groupId>
@@ -49,19 +49,14 @@
       <version>1.1.144</version>
     </dependency>
     <dependency>
-      <groupId>net.ladenthin</groupId>
-      <artifactId>streambuffer</artifactId>
-      <version>1.1.0</version>
-    </dependency>
-    <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>clojurescript</artifactId>
-      <version>1.11.4</version>
+      <version>1.11.60</version>
     </dependency>
     <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>tools.namespace</artifactId>
-      <version>1.2.0</version>
+      <version>1.3.0</version>
     </dependency>
     <dependency>
       <groupId>com.cognitect</groupId>
@@ -81,7 +76,7 @@
     <dependency>
       <groupId>http-kit</groupId>
       <artifactId>http-kit</artifactId>
-      <version>2.5.3</version>
+      <version>2.6.0</version>
     </dependency>
   </dependencies>
   <build>
@@ -114,7 +109,7 @@
         <configuration>
           <archive>
             <manifestEntries>
-              <git-revision>a4e7596e7e32581ec4f9ae269c5a009dde7a666a</git-revision>
+              <git-revision>eda78d7a1354e7482d95f1d9c1d0f3489ccd16f7</git-revision>
             </manifestEntries>
           </archive>
         </configuration>
