@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.lambdaisland</groupId>
   <artifactId>kaocha-cljs</artifactId>
-  <version>1.3.127</version>
+  <version>1.4.130</version>
   <name>kaocha-cljs</name>
   <description>ClojureScript support for Kaocha</description>
   <url>https://github.com/lambdaisland/kaocha-cljs</url>
@@ -25,7 +25,7 @@
     <url>https://github.com/lambdaisland/kaocha-cljs</url>
     <connection>scm:git:git://github.com/lambdaisland/kaocha-cljs.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/lambdaisland/kaocha-cljs.git</developerConnection>
-    <tag>eda78d7a1354e7482d95f1d9c1d0f3489ccd16f7</tag>
+    <tag>669c01ef3c8da0c34310972d694afbceef44f560</tag>
   </scm>
   <dependencies>
     <dependency>
@@ -109,7 +109,7 @@
         <configuration>
           <archive>
             <manifestEntries>
-              <git-revision>eda78d7a1354e7482d95f1d9c1d0f3489ccd16f7</git-revision>
+              <git-revision>669c01ef3c8da0c34310972d694afbceef44f560</git-revision>
             </manifestEntries>
           </archive>
         </configuration>
