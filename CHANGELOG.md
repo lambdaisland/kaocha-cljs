@@ -1,10 +1,8 @@
 # Unreleased
 
-## Added
-
-## Fixed
-
 ## Changed
+
+- Change to deep-diff2, since that's what Kaocha uses now
 
 # 1.2.123 (2022-02-28 / 019e6ef)
 

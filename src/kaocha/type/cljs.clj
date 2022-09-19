@@ -372,9 +372,9 @@
   (run-once-fixtures testable ns :before)
 
   (let [tests (map #(assoc %
-                      ::eval eval
-                      ::timeout timeout
-                      ::queue queue)
+                           ::eval eval
+                           ::timeout timeout
+                           ::queue queue)
                    (:kaocha.test-plan/tests testable))
         result (testable/run-testables tests test-plan)
         timeout? (some ::timeout? result)]

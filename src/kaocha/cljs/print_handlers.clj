@@ -1,6 +1,6 @@
 (ns kaocha.cljs.print-handlers
-  (:require [lambdaisland.deep-diff.printer :as printer]
-            [puget.printer :as puget]))
+  (:require [lambdaisland.deep-diff2.printer-impl :as printer]
+            [lambdaisland.deep-diff2.puget.printer :as puget]))
 
 (printer/register-print-handler!
  'com.cognitect.transit.impl.TaggedValueImpl
