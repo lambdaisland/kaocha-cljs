@@ -55,10 +55,6 @@ jobs:
 workflows:
   kaocha_test:
     jobs:
-      # - java-16-clojure-1_10
-      # - java-15-clojure-1_10
-      # - java-11-clojure-1_10
-      # - java-8-clojure-1_10
       - test:
           matrix:
             parameters:
