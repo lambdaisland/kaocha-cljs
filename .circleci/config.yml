@@ -28,18 +28,6 @@ commands:
           file: target/coverage/integration*/codecov.json
 
 jobs:
-  java-16-clojure-1_10:
-    executor: clojure/openjdk16
-    steps: [{checkout_and_run: {clojure_version: "1.10.3"}}]
-  java-15-clojure-1_10:
-    executor: clojure/openjdk15
-    steps: [{checkout_and_run: {clojure_version: "1.10.3"}}]
-  java-11-clojure-1_10:
-    executor: clojure/openjdk11
-    steps: [{checkout_and_run: {clojure_version: "1.10.3"}}]
-  java-8-clojure-1_10:
-    executor: clojure/openjdk8
-    steps: [{checkout_and_run: {clojure_version: "1.10.3"}}]
   test:
     parameters:
       os:
