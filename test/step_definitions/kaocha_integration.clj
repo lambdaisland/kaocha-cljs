@@ -7,6 +7,7 @@
             [lambdaisland.cucumber.dsl :refer :all]
             [me.raynes.fs :as fs])
   (:import java.io.File
+           java.nio.file.FileSystems
            [java.nio.file Files OpenOption Path Paths]
            [java.nio.file.attribute FileAttribute PosixFilePermissions]))
 
@@ -118,7 +119,8 @@
                         :always
                         (conj "\"$@\""))))
       (write-deps-edn deps-edn)
-      (Files/setPosixFilePermissions runner (PosixFilePermissions/fromString "rwxr--r--"));
+      (when (.. FileSystems (getDefault) (supportedFileAttributeViews) (contains "posix"))
+        (Files/setPosixFilePermissions runner (PosixFilePermissions/fromString "rwxr--r--")))
       (assoc m
              :dir dir
              :test-dir test-dir
