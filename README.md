@@ -10,7 +10,7 @@ ClojureScript support for Kaocha
 
 Kaocha-cljs provides basic ClojureScript support for the Kaocha test runner. It
 can run tests in the browser or in Node.js. It does this under the hood using
-the built-in ClojureScripr REPL implementations for the browser or for node.
+the built-in ClojureScript REPL implementations for the browser or for node.
 
 This approach makes it fairly easy to set up, but also fairly limited and
 inflexible.
@@ -29,7 +29,7 @@ infinitely flexible, but significantly harder to set up. For simple projects and
 libraries kaocha-cljs v1 can still be a valid choice. If it no longer serves
 your needs, you can try your hand at kaocha-cljs2.
 
-Kaocha-cljs require Clojure and ClojureScript 1.10 or later.
+Kaocha-cljs requires Clojure and ClojureScript 1.10 or later.
 
 <!-- installation -->
 ## Installation
@@ -166,7 +166,7 @@ post-load), which can be implemented by plugins, and test events
 (begin-test-var, pass, fail, summary) are generated, which are handled by a
 reporter to provide real-time progress.
 
-Kaocha's built-in features, plugins and reporters are rely on this model of
+Kaocha's built-in features, plugins and reporters rely on this model of
 execution, so any test type must adhere to it. Note that all of this is on the
 Clojure side. Kaocha's own core, as well as plugins and reporters are all
 implemented in (JVM-based) Clojure, not in ClojureScript, so even in the case of
