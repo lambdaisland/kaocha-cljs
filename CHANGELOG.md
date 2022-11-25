@@ -4,6 +4,8 @@
 
 ## Fixed
 
+- Fix integration test Windows error when setting POSIX file permissions
+
 ## Changed
 
 # 1.4.130 (2022-09-19 / 69599a1)
