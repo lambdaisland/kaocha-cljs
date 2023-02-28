@@ -10,11 +10,9 @@
 
 # 1.4.130 (2022-09-19 / 69599a1)
 
-## Added
-
 ## Fixed
 
-## Changed
+- Release under `com.lambdaisland` as well `lambdaisland`, see https://github.com/lambdaisland/open-source/issues/9
 
 # 1.3.127 (2022-09-19 / 3c9983e)
 
