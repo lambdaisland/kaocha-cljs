@@ -83,10 +83,10 @@
                              (let [ns-sym (file->ns-name ns-file)]
                                (when (load/ns-match? ns-patterns ns-sym)
                                  (ns-testable ns-sym ns-file))))
-                           test-files) ]
+                           test-files)]
     (if (version-check/meets-minimum-cljs-version 1 10)
       (assoc testable
-             :cljs/compiler-options copts
+             :cljs/compiler-options (dissoc copts :main)
              :cljs/repl-env repl-env
              :cljs/timeout timeout
              :cljs/compiler-env cenv
@@ -98,7 +98,7 @@
                  (fn []
                    (testable/load-testables testables)))))
       (assoc testable :kaocha.testable/load-error
-             (ex-info "ClojureScript version too low" {:expected ">=1.10"  :got (cljs.util/clojurescript-version) })))))
+             (ex-info "ClojureScript version too low" {:expected ">=1.10"  :got (cljs.util/clojurescript-version)})))))
 
 (defmethod testable/-load ::ns [testable]
   (let [ns-name (::ns testable)
@@ -256,9 +256,9 @@
                           'kaocha.cljs.run))
 
           (eval `((~'fn ~'wait-for-websocket-client []
-                    (if (~'exists? kaocha.cljs.websocket-client)
-                      (kaocha.cljs.websocket-client/connect! ~port)
-                      (js/setTimeout ~'wait-for-websocket-client 50)))))
+                        (if (~'exists? kaocha.cljs.websocket-client)
+                          (kaocha.cljs.websocket-client/connect! ~port)
+                          (js/setTimeout ~'wait-for-websocket-client 50)))))
           (eval done)
 
           (queue-consumer {:queue queue
@@ -333,9 +333,9 @@
   (eval `(kaocha.cljs.run/run-once-fixtures
           ~ns ~before-or-after
           (~'fn []
-           (kaocha.cljs.websocket-client/send!
-            {:type ::fixture-loaded
-             :fixture ['~ns ~before-or-after]}))))
+                (kaocha.cljs.websocket-client/send!
+                 {:type ::fixture-loaded
+                  :fixture ['~ns ~before-or-after]}))))
 
   (queue-consumer {:queue queue
                    :timeout timeout
@@ -351,9 +351,9 @@
         done (keyword (gensym "require-ns-done"))]
     (eval `(~'require '~ns))
     (eval `((~'fn ~'wait-for-symbol []
-             (if (~'exists? ~ns)
-               (kaocha.cljs.websocket-client/send! {:type :cljs/exists :symbol '~ns})
-               (js/setTimeout ~'wait-for-symbol 50)))))
+                  (if (~'exists? ~ns)
+                    (kaocha.cljs.websocket-client/send! {:type :cljs/exists :symbol '~ns})
+                    (js/setTimeout ~'wait-for-symbol 50)))))
     (eval done)
 
     (queue-consumer {:queue queue
@@ -469,11 +469,8 @@
                                           :kaocha/test-paths    ["test/cljs"]
                                           :kaocha/ns-patterns   [".*-test$"]
                                           :cljs/timeout 50000
-                                          :cljs/repl-env 'cljs.repl.browser/repl-env
-                                          }]
+                                          :cljs/repl-env 'cljs.repl.browser/repl-env}]
                           :kaocha.plugin.capture-output/capture-output? false
                           :kaocha/reporter ['kaocha.report/documentation]})
 
-  (require 'kaocha.type.var)
-
-  )
+  (require 'kaocha.type.var))
