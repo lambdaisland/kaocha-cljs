@@ -100,6 +100,33 @@ bin/kaocha unit-cljs
   the REPL is able to connect. If this is the case you can set this to `true`.
   Defaults to `false`.
 
+## Configuration for npm dependency
+
+When using kaocha-cljs with `:npm-deps`, you need to:
+
+- enable precompilation
+- make sure `:main`, `:install-deps`, `:npm-deps` are all set in the compiler options
+
+For example, if we want to compile left-pad npm library as npm dependency, the 
+`tests.edn` is like:
+
+```
+#kaocha/v1
+    {:bindings        {kaocha.type.cljs/*debug* true}
+     :capture-output? false
+     :tests           [{:id                    :unit-cljs
+                        :type                  :kaocha.type/cljs
+                        :cljs/precompile?      true
+                        :cljs/compiler-options {:main         npm_deps.main
+                                                :verbose      true
+                                                :install-deps true
+                                                :npm-deps     {:left-pad "1.1.3"}}
+                        :source-paths          ["src"]
+                        :test-paths            ["test"]}]}
+```
+Note: We use the compiler options twice `(if :cljs/precompile? is true)`: once to do the 
+      precompilation, and another once to start a REPL to communicate with.
+
 ## Known issues
 
 - The `:test-paths` do not get automatically added to the classpath (at least not
