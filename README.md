@@ -107,8 +107,8 @@ When using kaocha-cljs with `:npm-deps`, you need to:
 - enable precompilation
 - make sure `:main`, `:install-deps`, `:npm-deps` are all set in the compiler options
 
-For example, if we want to compile left-pad npm library as npm dependency, the 
-`tests.edn` is like:
+For example, if we want to compile the left-pad npm library as an npm dependency, the 
+`tests.edn` should look like:
 
 ```
 #kaocha/v1
