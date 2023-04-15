@@ -148,7 +148,7 @@ typically Node.
 There are two ways to fix it:
 
 1. Instruct kaocha-cljs to use a browser REPL.
-2. Prepare a dom for Node environment. For example, `(js/require "global-jsdom")` 
+2. Prepare a DOM for Node environment. For example, `(js/require "global-jsdom")` 
    in a pre-test hook
 
 ## Architecture
