@@ -142,7 +142,7 @@ a networking issue... We handed over control, and never got it back.
 - `"Execution error (ReferenceError) at (<cljs repl>:1).\ndocument is not defined\n"`
 
 This usually means you're using libraries that expect a DOM (i.e., they expect to 
-find`js/document`), but you are using them in an environment where there is no DOM,
+find `js/document`), but you are using them in an environment where there is no DOM,
 typically Node. 
 
 There are two ways to fix it:
