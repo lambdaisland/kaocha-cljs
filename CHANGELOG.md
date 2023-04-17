@@ -2,6 +2,8 @@
 
 ## Added
 
+- Add documentation of common issue when trying to run tests that reference the DOM in a context without a DOM (e.g., Node.js).
+
 ## Fixed
 
 - Fix integration test Windows error when setting POSIX file permissions
