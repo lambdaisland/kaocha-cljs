@@ -8,3 +8,4 @@ node_modules
 nashorn_code_cache
 out
 .store
+.temp
