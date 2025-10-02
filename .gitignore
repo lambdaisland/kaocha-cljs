@@ -9,3 +9,5 @@ nashorn_code_cache
 out
 .store
 .temp
+.lsp/
+.clj-kondo/
