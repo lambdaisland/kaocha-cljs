@@ -90,3 +90,5 @@ jobs:
           name: codecov-report
           files: target/coverage/codecov.json
           token: ${{ secrets.CODECOV_TOKEN }}
+          slug: lambdaisland/kaocha-cljs
+          verbose: true
