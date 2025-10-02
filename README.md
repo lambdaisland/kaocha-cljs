@@ -1,7 +1,7 @@
 # kaocha-cljs
 
 <!-- badges -->
-[![GitHub Actions](https://github.com/com.lambdaisland/kaocha-cljs/actions/workflows/main.yml/badge.svg)](https://github.com/com.lambdaisland/kaocha-cljs/actions/workflows/main.yml) [![cljdoc badge](https://cljdoc.org/badge/com.lambdaisland/kaocha-cljs)](https://cljdoc.org/d/com.lambdaisland/kaocha-cljs) [![Clojars Project](https://img.shields.io/clojars/v/com.lambdaisland/kaocha-cljs.svg)](https://clojars.org/com.lambdaisland/kaocha-cljs)
+[![GitHub Actions](https://github.com/lambdaisland/kaocha-cljs/actions/workflows/main.yml/badge.svg)](https://github.com/lambdaisland/kaocha-cljs/actions/workflows/main.yml) [![cljdoc badge](https://cljdoc.org/badge/com.lambdaisland/kaocha-cljs)](https://cljdoc.org/d/com.lambdaisland/kaocha-cljs) [![Clojars Project](https://img.shields.io/clojars/v/com.lambdaisland/kaocha-cljs.svg)](https://clojars.org/com.lambdaisland/kaocha-cljs)
 <!-- /badges -->
 
 ClojureScript support for Kaocha
