@@ -1,25 +1,25 @@
 {:deps
- {org.clojure/clojure         {:mvn/version "1.11.1"}
-  org.clojure/clojurescript   {:mvn/version "1.11.60"}
-  org.clojure/spec.alpha      {:mvn/version "0.3.218"}
-  org.clojure/tools.namespace {:mvn/version "1.3.0"}
+ {org.clojure/clojure         {:mvn/version "1.12.3"}
+  org.clojure/clojurescript   {:mvn/version "1.12.42"}
+  org.clojure/spec.alpha      {:mvn/version "0.5.238"}
+  org.clojure/tools.namespace {:mvn/version "1.5.0"}
 
-  http-kit/http-kit         {:mvn/version "2.6.0"}
-  com.cognitect/transit-clj {:mvn/version "1.0.329"}
+  http-kit/http-kit         {:mvn/version "2.8.1"}
+  com.cognitect/transit-clj {:mvn/version "1.0.333"}
   com.cognitect/transit-js  {:mvn/version "0.8.874"}
 
   pjstadig/humane-test-output {:mvn/version "0.11.0"}
 
-  lambdaisland/kaocha        {:mvn/version "1.70.1086"}
-  com.lambdaisland/glogi     {:mvn/version "1.1.144"}}
+  lambdaisland/kaocha        {:mvn/version "1.91.1392"}
+  com.lambdaisland/glogi     {:mvn/version "1.3.169"}}
 
  :paths ["src" "resources" "test/cljs"]
 
  :aliases
  {:test
-  {:extra-deps {lambdaisland/kaocha-cucumber  {:mvn/version "0.0-53"}
-                lambdaisland/kaocha-cloverage {:mvn/version "RELEASE"}
-                nubank/matcher-combinators    {:mvn/version "3.5.1"}
+  {:extra-deps {lambdaisland/kaocha-cucumber  {:mvn/version "0.11.100"}
+                lambdaisland/kaocha-cloverage {:mvn/version "1.1.89"}
+                nubank/matcher-combinators    {:mvn/version "3.9.2"}
                 akvo/fs                       {:mvn/version "20180904-152732.6dad3934"}}}
 
   :dev
