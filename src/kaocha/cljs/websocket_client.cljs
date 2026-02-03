@@ -114,8 +114,9 @@
      :cljs.test/message m
      :cljs.test/testing-contexts (:testing-contexts (t/get-current-env))}))
 
-(defmethod t/report [:kaocha.type/cljs ::propagate] [m]
-  (send! (cljs-test-msg m)))
+(doseq [t (hierarchy/known-keys)]
+  (defmethod t/report [:kaocha.type/cljs t] [m]
+    (send! (cljs-test-msg m))))
 
 (defmethod t/report [:kaocha.type/cljs :fail] [m]
   (send! (-> m
@@ -134,9 +135,6 @@
                       :message
                       (or (:message m) (.-message error)))
                cljs-test-msg))))
-
-(doseq [t (hierarchy/known-keys)]
-  (derive t ::propagate))
 
 (t/update-current-env! [:reporter] (constantly :kaocha.type/cljs))
 
