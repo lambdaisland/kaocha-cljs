@@ -1,18 +1,18 @@
 # Unreleased
 
-## Added
-
 ## Fixed
 
+- Fix clojurescript compatibility issue
+
 ## Changed
+
+- Bump dependencies
 
 # 1.8.163 (2025-10-02 / 49c8795)
 
-## Added
-
-## Fixed
-
 ## Changed
+
+- Bump dependencies
 
 # 1.5.154 (2023-04-17 / f969eae)
 
