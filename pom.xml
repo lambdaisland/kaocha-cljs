@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.lambdaisland</groupId>
   <artifactId>kaocha-cljs</artifactId>
-  <version>1.8.163</version>
+  <version>1.9.181</version>
   <name>kaocha-cljs</name>
   <description>ClojureScript support for Kaocha</description>
   <url>https://github.com/lambdaisland/kaocha-cljs</url>
@@ -25,13 +25,13 @@
     <url>https://github.com/lambdaisland/kaocha-cljs</url>
     <connection>scm:git:git://github.com/lambdaisland/kaocha-cljs.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/lambdaisland/kaocha-cljs.git</developerConnection>
-    <tag>c474037004740ee4df59f6916ebad5aac2de1e2c</tag>
+    <tag>9a1bc236166f9bbe9dedbbef4683947d25634201</tag>
   </scm>
   <dependencies>
     <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>clojure</artifactId>
-      <version>1.12.3</version>
+      <version>1.12.4</version>
     </dependency>
     <dependency>
       <groupId>lambdaisland</groupId>
@@ -41,7 +41,7 @@
     <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>spec.alpha</artifactId>
-      <version>0.5.238</version>
+      <version>0.6.249</version>
     </dependency>
     <dependency>
       <groupId>com.lambdaisland</groupId>
@@ -51,12 +51,12 @@
     <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>clojurescript</artifactId>
-      <version>1.12.42</version>
+      <version>1.12.134</version>
     </dependency>
     <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>tools.namespace</artifactId>
-      <version>1.5.0</version>
+      <version>1.5.1</version>
     </dependency>
     <dependency>
       <groupId>com.cognitect</groupId>
@@ -71,7 +71,7 @@
     <dependency>
       <groupId>com.cognitect</groupId>
       <artifactId>transit-clj</artifactId>
-      <version>1.0.333</version>
+      <version>1.1.347</version>
     </dependency>
     <dependency>
       <groupId>http-kit</groupId>
@@ -109,7 +109,7 @@
         <configuration>
           <archive>
             <manifestEntries>
-              <git-revision>c474037004740ee4df59f6916ebad5aac2de1e2c</git-revision>
+              <git-revision>9a1bc236166f9bbe9dedbbef4683947d25634201</git-revision>
             </manifestEntries>
           </archive>
         </configuration>
